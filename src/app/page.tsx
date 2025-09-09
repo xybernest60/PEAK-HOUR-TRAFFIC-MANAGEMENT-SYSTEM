@@ -60,15 +60,25 @@ export default function DashboardPage() {
           allRedTime: dbConfig.all_red,
         });
 
-        // State
+        // State & Manual Override
         const state = data.state;
+        const commands = data.commands;
+        const manualOverride = commands.override;
+        
         setCurrentPhase(state.current_phase);
-        setLight1Status(state.light1.status.toLowerCase());
-        setLight2Status(state.light2.status.toLowerCase());
         setLight1Timer(state.light1.timer_s);
         setLight2Timer(state.light2.timer_s);
         setMode(state.mode);
         setIsPeakHour(state.peak_active);
+        setIsManualOverride(manualOverride);
+
+        if (manualOverride) {
+            setLight1Status(commands.manual.light1.toLowerCase());
+            setLight2Status(commands.manual.light2.toLowerCase());
+        } else {
+            setLight1Status(state.light1.status.toLowerCase());
+            setLight2Status(state.light2.status.toLowerCase());
+        }
 
         // System Status & Sensors
         setSystemStatus({
@@ -76,9 +86,6 @@ export default function DashboardPage() {
           vehiclePresence: data.sensors.ir1.present || data.sensors.ir2.present,
           systemOnline: data.system.online,
         });
-
-        // Manual Override
-        setIsManualOverride(data.commands.override);
         
         // SMS Alerts
         setSmsConfig(data.alerts.gsm);
