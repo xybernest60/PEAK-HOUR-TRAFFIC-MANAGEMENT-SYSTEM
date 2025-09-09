@@ -38,8 +38,8 @@ const Light = ({ color, active }: { color: string; active: boolean }) => {
 
 const TrafficLight = ({ activeColor }: { activeColor: LightColor }) => {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-lg bg-background p-2 border">
-       <div className="flex flex-col items-center gap-2 rounded-lg bg-background p-2">
+    <div className="flex flex-col items-center gap-2 rounded-lg bg-background/50 dark:bg-background p-2 border">
+       <div className="flex flex-col items-center gap-2 rounded-lg bg-background/50 dark:bg-background p-2">
         <Light color="#ef4444" active={activeColor === "red"} />
         <Light color="#f59e0b" active={activeColor === "yellow"} />
         <Light color="#22c55e" active={activeColor === "green"} />
@@ -99,18 +99,18 @@ export default function TrafficControlCard({
             <h3 className="font-semibold text-lg">Robert Mugabe Rd</h3>
             <TrafficLight activeColor={nsColor} />
             <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200 disabled:opacity-40 disabled:cursor-not-allowed">Green</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed">Yellow</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200 disabled:opacity-40 disabled:cursor-not-allowed">Red</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'green')} disabled={!isManualOverride} className="dark:bg-green-500/20 bg-green-500/80 hover:bg-green-500/90 dark:hover:bg-green-500/40 text-white dark:text-green-200 disabled:opacity-40 disabled:cursor-not-allowed">Green</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'yellow')} disabled={!isManualOverride} className="dark:bg-yellow-500/20 bg-yellow-500/80 hover:bg-yellow-500/90 dark:hover:bg-yellow-500/40 text-white dark:text-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed">Yellow</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'red')} disabled={!isManualOverride} className="dark:bg-red-500/20 bg-red-500/80 hover:bg-red-500/90 dark:hover:bg-red-500/40 text-white dark:text-red-200 disabled:opacity-40 disabled:cursor-not-allowed">Red</Button>
             </div>
           </div>
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Sam Munjoma St</h3>
             <TrafficLight activeColor={ewColor} />
              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200 disabled:opacity-40 disabled:cursor-not-allowed">Green</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed">Yellow</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200 disabled:opacity-40 disabled:cursor-not-allowed">Red</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'green')} disabled={!isManualOverride} className="dark:bg-green-500/20 bg-green-500/80 hover:bg-green-500/90 dark:hover:bg-green-500/40 text-white dark:text-green-200 disabled:opacity-40 disabled:cursor-not-allowed">Green</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'yellow')} disabled={!isManualOverride} className="dark:bg-yellow-500/20 bg-yellow-500/80 hover:bg-yellow-500/90 dark:hover:bg-yellow-500/40 text-white dark:text-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed">Yellow</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'red')} disabled={!isManualOverride} className="dark:bg-red-500/20 bg-red-500/80 hover:bg-red-500/90 dark:hover:bg-red-500/40 text-white dark:text-red-200 disabled:opacity-40 disabled:cursor-not-allowed">Red</Button>
             </div>
           </div>
         </div>
