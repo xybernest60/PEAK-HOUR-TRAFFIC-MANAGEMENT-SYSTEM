@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/firebase";
 import { ref, onValue, set, update } from "firebase/database";
 
-export interface Config {
+export interface TimingConfig {
   normalGreenTime: number;
   rainGreenTime: number;
   yellowTime: number;
@@ -17,12 +17,17 @@ export interface Config {
   minGreenTime: number;
 }
 
+export interface PeakHourConfig {
+  start: string;
+  end: string;
+}
+
 export type LightColor = "green" | "yellow" | "red";
 
 export default function DashboardPage() {
   const { toast } = useToast();
 
-  const [config, setConfig] = React.useState<Config>({
+  const [timingConfig, setTimingConfig] = React.useState<TimingConfig>({
     normalGreenTime: 20,
     rainGreenTime: 30,
     yellowTime: 3,
@@ -30,7 +35,13 @@ export default function DashboardPage() {
     minGreenTime: 5,
   });
 
-  const [isPeakHour, setIsPeakHour] = React.useState(false);
+  const [peakHourConfig, setPeakHourConfig] = React.useState<PeakHourConfig>({
+    start: '06:30',
+    end: '10:00'
+  });
+
+  const [isPeakHourActive, setIsPeakHourActive] = React.useState(false);
+  const [isManualPeakHour, setIsManualPeakHour] = React.useState(false);
   const [isManualOverride, setIsManualOverride] = React.useState(false);
   
   const [systemStatus, setSystemStatus] = React.useState({
@@ -57,14 +68,22 @@ export default function DashboardPage() {
       const data = snapshot.val();
       if (data) {
         // Config
-        const dbConfig = data.config.delays_s;
-        setConfig({
-          normalGreenTime: dbConfig.normal_green,
-          rainGreenTime: dbConfig.rain_green,
-          yellowTime: 3, // This seems to be static based on previous files.
-          allRedTime: dbConfig.all_red,
-          minGreenTime: dbConfig.min_green,
+        const dbTimingConfig = data.config.delays_s;
+        setTimingConfig({
+          normalGreenTime: dbTimingConfig.normal_green,
+          rainGreenTime: dbTimingConfig.rain_green,
+          yellowTime: 3, // This seems to be static
+          allRedTime: dbTimingConfig.all_red,
+          minGreenTime: dbTimingConfig.min_green,
         });
+
+        const dbPeakConfig = data.config.peak_hour;
+        setPeakHourConfig({
+            start: dbPeakConfig.start,
+            end: dbPeakConfig.end,
+        });
+        setIsManualPeakHour(dbPeakConfig.manual_toggle);
+
 
         // State & Manual Override
         const state = data.state;
@@ -75,7 +94,7 @@ export default function DashboardPage() {
         setLight1Timer(state.light1.timer_s);
         setLight2Timer(state.light2.timer_s);
         setMode(state.mode);
-        setIsPeakHour(state.peak_active);
+        setIsPeakHourActive(state.peak_active);
         setIsManualOverride(manualOverride);
 
         if (manualOverride) {
@@ -126,7 +145,7 @@ export default function DashboardPage() {
   }, [toast]);
 
 
-  const handleConfigSave = (newConfig: Config) => {
+  const handleTimingConfigSave = (newConfig: TimingConfig) => {
     const updates = {
       'traffic/config/delays_s/normal_green': newConfig.normalGreenTime,
       'traffic/config/delays_s/rain_green': newConfig.rainGreenTime,
@@ -137,7 +156,28 @@ export default function DashboardPage() {
       .then(() => {
         toast({
           title: "Configuration Saved",
-          description: "Traffic light timings have been updated in Firebase.",
+          description: "Traffic light timings have been updated.",
+        });
+      })
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Update Failed",
+          description: error.message,
+        });
+      });
+  };
+
+  const handlePeakHourConfigSave = (newConfig: PeakHourConfig) => {
+    const updates = {
+        'traffic/config/peak_hour/start': newConfig.start,
+        'traffic/config/peak_hour/end': newConfig.end,
+    };
+    update(ref(database), updates)
+      .then(() => {
+        toast({
+          title: "Configuration Saved",
+          description: "Peak hour schedule has been updated.",
         });
       })
       .catch((error) => {
@@ -161,7 +201,7 @@ export default function DashboardPage() {
     set(ref(database, 'traffic/commands/override'), manual);
   };
   
-  const handleSetPeakHour = (peak: boolean) => {
+  const handleSetManualPeakHour = (peak: boolean) => {
     set(ref(database, 'traffic/config/peak_hour/manual_toggle'), peak);
   };
 
@@ -195,7 +235,7 @@ export default function DashboardPage() {
   const getTimerForPhase = () => {
     if (currentPhase.includes('R1')) return light1Timer;
     if (currentPhase.includes('R2')) return light2Timer;
-    if (currentPhase === 'ALL_RED') return config.allRedTime;
+    if (currentPhase === 'ALL_RED') return timingConfig.allRedTime;
     return 0;
   }
   
@@ -203,13 +243,13 @@ export default function DashboardPage() {
     const phaseState = getPhaseState();
     const timer = getTimerForPhase();
 
-    let maxTime = config.normalGreenTime;
+    let maxTime = timingConfig.normalGreenTime;
     if(phaseState === 'green'){
-      maxTime = isPeakHour ? config.rainGreenTime : config.normalGreenTime
+      maxTime = isPeakHourActive ? timingConfig.rainGreenTime : timingConfig.normalGreenTime
     } else if (phaseState === 'yellow'){
-      maxTime = config.yellowTime
+      maxTime = timingConfig.yellowTime
     } else {
-      maxTime = config.allRedTime;
+      maxTime = timingConfig.allRedTime;
     }
     
     if (maxTime === 0) return 0;
@@ -219,7 +259,12 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header config={config} setConfig={handleConfigSave} />
+      <Header 
+        timingConfig={timingConfig} 
+        peakHourConfig={peakHourConfig}
+        onTimingConfigSave={handleTimingConfigSave}
+        onPeakHourConfigSave={handlePeakHourConfigSave}
+      />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <SystemStatusCard 
@@ -236,8 +281,8 @@ export default function DashboardPage() {
               progress={getProgress()}
               isManualOverride={isManualOverride}
               setManualOverride={handleSetManualOverride}
-              isPeakHour={isPeakHour}
-              setPeakHour={handleSetPeakHour}
+              isPeakHour={isManualPeakHour}
+              setPeakHour={handleSetManualPeakHour}
               onManualLightChange={handleManualLightChange}
             />
           </div>
