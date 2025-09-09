@@ -25,11 +25,11 @@ export default function SmsAlertsCard({
   isEnabled,
   onSave,
 }: SmsAlertsCardProps) {
-  const [localPhoneNumber, setLocalPhoneNumber] = React.useState(phoneNumber);
+  const [localPhoneNumber, setLocalPhoneNumber] = React.useState(phoneNumber || "");
   const [localIsEnabled, setLocalIsEnabled] = React.useState(isEnabled);
 
   React.useEffect(() => {
-    setLocalPhoneNumber(phoneNumber);
+    setLocalPhoneNumber(phoneNumber || "");
     setLocalIsEnabled(isEnabled);
   }, [phoneNumber, isEnabled]);
 
