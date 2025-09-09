@@ -3,12 +3,10 @@
 import * as React from "react";
 import Header from "@/components/dashboard/header";
 import TrafficControlCard from "@/components/dashboard/traffic-control-card";
-import StatusCard from "@/components/dashboard/status-card";
+import SystemStatusCard from "@/components/dashboard/system-status-card";
 import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/firebase";
 import { ref, onValue, set, update } from "firebase/database";
-import { Car, CloudRain, Waypoints, ToggleLeft } from "lucide-react";
-
 
 export interface TimingConfig {
   normalGreenTime: number;
@@ -238,18 +236,6 @@ export default function DashboardPage() {
     return 'red';
   }
   
-    const getPhaseText = () => {
-    if (currentPhase === 'ALL_RED') return 'All Red';
-    const phaseState = getPhaseState();
-    if (currentPhase.includes('R1')) {
-       return `R. Mugabe Rd ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
-    }
-     if (currentPhase.includes('R2')) {
-       return `S. Munjoma St ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
-    }
-    return currentPhase;
-  };
-
   const getTimerForPhase = () => {
     if (currentPhase.includes('R1')) return light1Timer;
     if (currentPhase.includes('R2')) return light2Timer;
@@ -286,8 +272,8 @@ export default function DashboardPage() {
         onPeakHourConfigSave={handlePeakHourConfigSave}
         onSmsNumberSave={handleSmsNumberSave}
       />
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-4 md:grid-cols-1">
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
+        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
             <TrafficControlCard
               nsColor={light1Status}
               ewColor={light2Status}
@@ -302,39 +288,13 @@ export default function DashboardPage() {
               setSmsEnabled={handleSmsEnabledChange}
             />
         </div>
-         <div className="grid gap-4 md:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            <StatusCard 
-                icon={CloudRain} 
-                title="Rain Detection" 
-                value={systemStatus.rainDetected ? "Active" : "Clear"}
-                valueClass={systemStatus.rainDetected ? "text-cyan-400" : ""}
-                hasGlow={systemStatus.rainDetected}
-            />
-            <StatusCard 
-                icon={Car} 
-                title="R. Mugabe Presence" 
-                value={systemStatus.vehiclePresence1 ? "Detected" : "None"}
-                valueClass={systemStatus.vehiclePresence1 ? "text-primary" : ""}
-                hasGlow={systemStatus.vehiclePresence1}
-            />
-             <StatusCard 
-                icon={Car} 
-                title="S. Munjoma Presence" 
-                value={systemStatus.vehiclePresence2 ? "Detected" : "None"}
-                valueClass={systemStatus.vehiclePresence2 ? "text-primary" : ""}
-                hasGlow={systemStatus.vehiclePresence2}
-            />
-            <StatusCard 
-                icon={Waypoints} 
-                title="Current Phase" 
-                value={getPhaseText()}
-            />
-            <StatusCard 
-                icon={ToggleLeft} 
-                title="Operation Mode" 
-                value={isManualOverride ? "Manual" : "Automatic"}
-                valueClass={isManualOverride ? "text-amber-400" : "text-green-400"}
-            />
+         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-1">
+           <SystemStatusCard 
+             status={systemStatus}
+             currentPhase={currentPhase}
+             phaseState={getPhaseState()}
+             isManualOverride={isManualOverride}
+           />
         </div>
       </main>
     </div>
