@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'TrafficPilot Dashboard',
-  description: 'Real-time traffic management and control.',
+  title: 'PEAK HOUR TRAFFIC MANAGEMENT SYSTEM',
+  description: 'Real-time monitoring and control',
 };
 
 export default function RootLayout({

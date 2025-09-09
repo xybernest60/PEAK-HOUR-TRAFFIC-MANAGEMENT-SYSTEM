@@ -287,6 +287,21 @@ export default function DashboardPage() {
         onSmsNumberSave={handleSmsNumberSave}
       />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="grid gap-4 md:grid-cols-1">
+            <TrafficControlCard
+              nsColor={light1Status}
+              ewColor={light2Status}
+              timer={getTimerForPhase()}
+              progress={getProgress()}
+              isManualOverride={isManualOverride}
+              setManualOverride={handleSetManualOverride}
+              isPeakHour={isManualPeakHour}
+              setPeakHour={handleSetManualPeakHour}
+              onManualLightChange={handleManualLightChange}
+              isSmsEnabled={smsConfig.enabled}
+              setSmsEnabled={handleSmsEnabledChange}
+            />
+        </div>
          <div className="grid gap-4 md:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <StatusCard 
                 icon={CloudRain} 
@@ -319,21 +334,6 @@ export default function DashboardPage() {
                 title="Operation Mode" 
                 value={isManualOverride ? "Manual" : "Automatic"}
                 valueClass={isManualOverride ? "text-amber-400" : "text-green-400"}
-            />
-        </div>
-        <div className="grid gap-4 md:grid-cols-1">
-            <TrafficControlCard
-              nsColor={light1Status}
-              ewColor={light2Status}
-              timer={getTimerForPhase()}
-              progress={getProgress()}
-              isManualOverride={isManualOverride}
-              setManualOverride={handleSetManualOverride}
-              isPeakHour={isManualPeakHour}
-              setPeakHour={handleSetManualPeakHour}
-              onManualLightChange={handleManualLightChange}
-              isSmsEnabled={smsConfig.enabled}
-              setSmsEnabled={handleSmsEnabledChange}
             />
         </div>
       </main>

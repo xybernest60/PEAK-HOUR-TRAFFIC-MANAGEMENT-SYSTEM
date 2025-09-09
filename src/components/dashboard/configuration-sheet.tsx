@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -18,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Settings } from "lucide-react";
 import * as React from "react";
 import { ScrollArea } from "../ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 interface ConfigurationSheetProps {
   timingConfig: TimingConfig;
@@ -36,9 +36,14 @@ export default function ConfigurationSheet({
   onPeakHourConfigSave,
   onSmsNumberSave,
 }: ConfigurationSheetProps) {
-  const [localTimingConfig, setLocalTimingConfig] = React.useState(timingConfig);
-  const [localPeakHourConfig, setLocalPeakHourConfig] = React.useState(peakHourConfig);
-  const [localSmsPhoneNumber, setLocalSmsPhoneNumber] = React.useState(smsConfig.phoneNumber);
+  const { toast } = useToast();
+  const [localTimingConfig, setLocalTimingConfig] =
+    React.useState(timingConfig);
+  const [localPeakHourConfig, setLocalPeakHourConfig] =
+    React.useState(peakHourConfig);
+  const [localSmsPhoneNumber, setLocalSmsPhoneNumber] = React.useState(
+    smsConfig.phoneNumber
+  );
 
   React.useEffect(() => {
     setLocalTimingConfig(timingConfig);
@@ -47,15 +52,20 @@ export default function ConfigurationSheet({
   React.useEffect(() => {
     setLocalPeakHourConfig(peakHourConfig);
   }, [peakHourConfig]);
-  
+
   React.useEffect(() => {
     setLocalSmsPhoneNumber(smsConfig.phoneNumber || "");
   }, [smsConfig.phoneNumber]);
 
-
-  const handleSave = () => {
+  const handleTimingSave = () => {
     onTimingConfigSave(localTimingConfig);
+  };
+
+  const handlePeakHourSave = () => {
     onPeakHourConfigSave(localPeakHourConfig);
+  };
+
+  const handleSmsSave = () => {
     onSmsNumberSave(localSmsPhoneNumber);
   };
 
@@ -66,8 +76,8 @@ export default function ConfigurationSheet({
 
   const handlePeakHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLocalPeakHourConfig((prev) => ({...prev, [name]: value}));
-  }
+    setLocalPeakHourConfig((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
     <Sheet>
@@ -85,114 +95,121 @@ export default function ConfigurationSheet({
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-grow">
-            <div className="grid gap-6 py-6 pr-4">
-            <div>
-                <h3 className="text-lg font-medium mb-4">Timing (seconds)</h3>
-                <div className="grid gap-4">
+          <div className="grid gap-6 py-6 pr-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Timing (seconds)</h3>
+                <Button onClick={handleTimingSave}>Save</Button>
+              </div>
+              <div className="grid gap-4">
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="normalGreenTime" className="text-right">
+                  <Label htmlFor="normalGreenTime" className="text-right">
                     Normal Green
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="normalGreenTime"
                     name="normalGreenTime"
                     type="number"
                     value={localTimingConfig.normalGreenTime}
                     onChange={handleTimingChange}
-                    />
+                  />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="rainGreenTime" className="text-right">
+                  <Label htmlFor="rainGreenTime" className="text-right">
                     Rain Green
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="rainGreenTime"
                     name="rainGreenTime"
                     type="number"
                     value={localTimingConfig.rainGreenTime}
                     onChange={handleTimingChange}
-                    />
+                  />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="minGreenTime" className="text-right">
+                  <Label htmlFor="minGreenTime" className="text-right">
                     Min Green
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="minGreenTime"
                     name="minGreenTime"
                     type="number"
                     value={localTimingConfig.minGreenTime}
                     onChange={handleTimingChange}
-                    />
+                  />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="allRedTime" className="text-right">
+                  <Label htmlFor="allRedTime" className="text-right">
                     All-Red
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="allRedTime"
                     name="allRedTime"
                     type="number"
                     value={localTimingConfig.allRedTime}
                     onChange={handleTimingChange}
-                    />
+                  />
                 </div>
-                </div>
+              </div>
             </div>
             <Separator />
-            <div>
-                <h3 className="text-lg font-medium mb-4">Peak Hours</h3>
-                <div className="grid gap-4">
+            <div className="space-y-4">
+               <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Peak Hours</h3>
+                <Button onClick={handlePeakHourSave}>Save</Button>
+              </div>
+              <div className="grid gap-4">
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="start" className="text-right">
+                  <Label htmlFor="start" className="text-right">
                     Start Time
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="start"
                     name="start"
                     type="time"
                     value={localPeakHourConfig.start}
                     onChange={handlePeakHourChange}
-                    />
+                  />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="end" className="text-right">
+                  <Label htmlFor="end" className="text-right">
                     End Time
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="end"
                     name="end"
                     type="time"
                     value={localPeakHourConfig.end}
                     onChange={handlePeakHourChange}
-                    />
+                  />
                 </div>
-                </div>
+              </div>
             </div>
             <Separator />
-            <div>
-                <h3 className="text-lg font-medium mb-4">GSM Alerts</h3>
-                <div className="grid gap-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">GSM Alerts</h3>
+                 <Button onClick={handleSmsSave}>Save</Button>
+              </div>
+              <div className="grid gap-4">
                 <div className="grid grid-cols-2 items-center gap-4">
-                    <Label htmlFor="phone-number" className="text-right">
+                  <Label htmlFor="phone-number" className="text-right">
                     Phone Number
-                    </Label>
-                    <Input
+                  </Label>
+                  <Input
                     id="phone-number"
                     placeholder="+263 7..."
                     type="tel"
                     value={localSmsPhoneNumber || ""}
                     onChange={(e) => setLocalSmsPhoneNumber(e.target.value)}
-                    />
+                  />
                 </div>
-                </div>
+              </div>
             </div>
-            </div>
+          </div>
         </ScrollArea>
         <SheetFooter>
-          <SheetClose asChild>
-            <Button onClick={handleSave}>Save Changes</Button>
-          </SheetClose>
+            {/* Footer can be empty or have a close button */}
         </SheetFooter>
       </SheetContent>
     </Sheet>
