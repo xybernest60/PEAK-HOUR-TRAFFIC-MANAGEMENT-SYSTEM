@@ -16,11 +16,10 @@ import {
 } from "@/components/ui/sheet";
 import { Settings } from "lucide-react";
 import * as React from "react";
-import { useToast } from "@/hooks/use-toast";
 
 interface ConfigurationSheetProps {
   config: Config;
-  setConfig: React.Dispatch<React.SetStateAction<Config>>;
+  setConfig: (config: Config) => void;
 }
 
 export default function ConfigurationSheet({
@@ -28,7 +27,6 @@ export default function ConfigurationSheet({
   setConfig,
 }: ConfigurationSheetProps) {
   const [localConfig, setLocalConfig] = React.useState(config);
-  const { toast } = useToast();
 
   React.useEffect(() => {
     setLocalConfig(config);
@@ -36,10 +34,6 @@ export default function ConfigurationSheet({
 
   const handleSave = () => {
     setConfig(localConfig);
-    toast({
-      title: "Configuration Saved",
-      description: "Traffic light timings have been updated.",
-    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +95,7 @@ export default function ConfigurationSheet({
               value={localConfig.yellowTime}
               onChange={handleChange}
               className="col-span-2"
+              disabled // Not in DB
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

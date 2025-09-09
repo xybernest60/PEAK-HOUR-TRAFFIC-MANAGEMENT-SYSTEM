@@ -1,5 +1,6 @@
 "use client";
 
+import type { LightColor } from "@/app/page";
 import {
   Card,
   CardContent,
@@ -13,8 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type LightColor = "red" | "yellow" | "green";
-
 const Light = ({ color, active }: { color: string; active: boolean }) => {
   return (
     <div
@@ -27,12 +26,15 @@ const Light = ({ color, active }: { color: string; active: boolean }) => {
   );
 };
 
-const TrafficLight = ({ activeColor }: { activeColor: LightColor }) => {
+const TrafficLight = ({ activeColor, onManualChange, isManual, lightId }: { activeColor: LightColor, onManualChange: (color: LightColor) => void, isManual: boolean, lightId: 'light1' | 'light2' }) => {
+  const colors: LightColor[] = ["red", "yellow", "green"];
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg bg-background p-2 border">
-      <Light color="#ef4444" active={activeColor === "red"} />
-      <Light color="#f59e0b" active={activeColor === "yellow"} />
-      <Light color="#22c55e" active={activeColor === "green"} />
+       <div className={cn("flex flex-col items-center gap-2 rounded-lg bg-background p-2", isManual && "cursor-pointer")}>
+        <div onClick={() => isManual && onManualChange('red')} className="p-1"><Light color="#ef4444" active={activeColor === "red"} /></div>
+        <div onClick={() => isManual && onManualChange('yellow')} className="p-1"><Light color="#f59e0b" active={activeColor === "yellow"} /></div>
+        <div onClick={() => isManual && onManualChange('green')} className="p-1"><Light color="#22c55e" active={activeColor === "green"} /></div>
+    </div>
     </div>
   );
 };
@@ -46,7 +48,7 @@ interface TrafficControlCardProps {
   setManualOverride: (value: boolean) => void;
   isPeakHour: boolean;
   setPeakHour: (value: boolean) => void;
-  onManualLightChange: (direction: 'NS' | 'EW') => void;
+  onManualLightChange: (light: 'light1' | 'light2', color: LightColor) => void;
 }
 
 export default function TrafficControlCard({
@@ -72,21 +74,21 @@ export default function TrafficControlCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Robert Mugabe Rd</h3>
-            <TrafficLight activeColor={nsColor} />
-            {isManualOverride && (
-              <Button size="sm" variant="outline" onClick={() => onManualLightChange('NS')} disabled={nsColor === 'green'}>
-                Activate N-S
-              </Button>
-            )}
+            <TrafficLight 
+              activeColor={nsColor}
+              onManualChange={(color) => onManualLightChange('light1', color)}
+              isManual={isManualOverride}
+              lightId="light1"
+            />
           </div>
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Sam Munjoma St</h3>
-            <TrafficLight activeColor={ewColor} />
-            {isManualOverride && (
-               <Button size="sm" variant="outline" onClick={() => onManualLightChange('EW')} disabled={ewColor === 'green'}>
-                Activate E-W
-              </Button>
-            )}
+            <TrafficLight 
+              activeColor={ewColor} 
+              onManualChange={(color) => onManualLightChange('light2', color)}
+              isManual={isManualOverride}
+              lightId="light2"
+            />
           </div>
         </div>
         <div className="space-y-3">
@@ -112,6 +114,7 @@ export default function TrafficControlCard({
               id="peak-hour"
               checked={isPeakHour}
               onCheckedChange={setPeakHour}
+              disabled={isManualOverride}
             />
             <Label htmlFor="peak-hour">Peak Hour Mode</Label>
           </div>

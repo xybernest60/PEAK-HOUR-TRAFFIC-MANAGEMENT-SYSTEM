@@ -13,20 +13,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import * as React from "react";
-import { useToast } from "@/hooks/use-toast";
 
-export default function SmsAlertsCard() {
-  const [phoneNumber, setPhoneNumber] = React.useState("");
-  const [isEnabled, setIsEnabled] = React.useState(false);
-  const { toast } = useToast();
+interface SmsAlertsCardProps {
+  phoneNumber: string;
+  isEnabled: boolean;
+  onSave: (config: { phoneNumber: string; isEnabled: boolean }) => void;
+}
+
+export default function SmsAlertsCard({
+  phoneNumber,
+  isEnabled,
+  onSave,
+}: SmsAlertsCardProps) {
+  const [localPhoneNumber, setLocalPhoneNumber] = React.useState(phoneNumber);
+  const [localIsEnabled, setLocalIsEnabled] = React.useState(isEnabled);
+
+  React.useEffect(() => {
+    setLocalPhoneNumber(phoneNumber);
+    setLocalIsEnabled(isEnabled);
+  }, [phoneNumber, isEnabled]);
+
 
   const handleSave = () => {
-    // In a real app, this would save to a backend.
-    console.log("Saving SMS alerts config:", { phoneNumber, isEnabled });
-    toast({
-      title: "SMS Alerts Updated",
-      description: `Notifications will be sent to ${phoneNumber}.`,
-    });
+    onSave({ phoneNumber: localPhoneNumber, isEnabled: localIsEnabled });
   };
 
   return (
@@ -44,15 +53,15 @@ export default function SmsAlertsCard() {
             id="phone-number"
             placeholder="+1 (555) 123-4567"
             type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            value={localPhoneNumber}
+            onChange={(e) => setLocalPhoneNumber(e.target.value)}
           />
         </div>
         <div className="flex items-center space-x-2">
           <Switch
             id="sms-enabled"
-            checked={isEnabled}
-            onCheckedChange={setIsEnabled}
+            checked={localIsEnabled}
+            onCheckedChange={setLocalIsEnabled}
           />
           <Label htmlFor="sms-enabled">Enable SMS Alerts</Label>
         </div>

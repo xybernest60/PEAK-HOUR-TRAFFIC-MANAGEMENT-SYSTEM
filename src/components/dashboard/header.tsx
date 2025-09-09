@@ -6,7 +6,7 @@ import ConfigurationSheet from "@/components/dashboard/configuration-sheet";
 
 interface HeaderProps {
   config: Config;
-  setConfig: React.Dispatch<React.SetStateAction<Config>>;
+  setConfig: (config: Config) => void;
 }
 
 export default function Header({ config, setConfig }: HeaderProps) {

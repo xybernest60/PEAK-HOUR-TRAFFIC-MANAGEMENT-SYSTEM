@@ -19,9 +19,9 @@ interface SystemStatusCardProps {
     vehiclePresence: boolean;
     systemOnline: boolean;
   };
-  setStatus: (status: Partial<typeof status>) => void;
-  currentPhase: "NS" | "EW" | "ALL_RED";
-  phaseState: "green" | "yellow";
+  setStatus: (status: { systemOnline: boolean }) => void;
+  currentPhase: string;
+  phaseState: "green" | "yellow" | "red";
   isManualOverride: boolean;
 }
 
@@ -56,9 +56,13 @@ export default function SystemStatusCard({
 }: SystemStatusCardProps) {
   const getPhaseText = () => {
     if (currentPhase === 'ALL_RED') return 'All Red';
-    const direction = currentPhase === 'NS' ? 'North-South' : 'East-West';
-    const color = phaseState.charAt(0).toUpperCase() + phaseState.slice(1);
-    return `${direction} ${color}`;
+    if (currentPhase.includes('R1')) {
+       return `R. Mugabe Rd ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
+    }
+     if (currentPhase.includes('R2')) {
+       return `S. Munjoma St ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
+    }
+    return currentPhase;
   };
 
   return (
