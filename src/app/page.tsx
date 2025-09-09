@@ -11,8 +11,8 @@ import { ref, onValue, set, update } from "firebase/database";
 
 export interface Config {
   normalGreenTime: number;
-  peakGreenTime: number; // Assuming this will be added to DB, using rain_green for now
-  yellowTime: number; // Not in DB, using a default
+  peakGreenTime: number;
+  yellowTime: number; 
   allRedTime: number;
 }
 
@@ -55,8 +55,8 @@ export default function DashboardPage() {
         const dbConfig = data.config.delays_s;
         setConfig({
           normalGreenTime: dbConfig.normal_green,
-          peakGreenTime: dbConfig.rain_green, // Placeholder
-          yellowTime: 3, // Placeholder
+          peakGreenTime: dbConfig.rain_green, 
+          yellowTime: 3, // This seems to be static based on previous files.
           allRedTime: dbConfig.all_red,
         });
 
@@ -99,7 +99,7 @@ export default function DashboardPage() {
   const handleConfigSave = (newConfig: Config) => {
     const updates = {
       'traffic/config/delays_s/normal_green': newConfig.normalGreenTime,
-      'traffic/config/delays_s/rain_green': newConfig.peakGreenTime, // Placeholder
+      'traffic/config/delays_s/rain_green': newConfig.peakGreenTime,
       'traffic/config/delays_s/all_red': newConfig.allRedTime,
     };
     update(ref(database), updates)
@@ -120,12 +120,7 @@ export default function DashboardPage() {
 
   const handleManualLightChange = (light: 'light1' | 'light2', color: LightColor) => {
     if (isManualOverride) {
-      const otherLight = light === 'light1' ? 'light2' : 'light1';
-      const updates = {
-        [`traffic/commands/manual/${light}`]: color.toUpperCase(),
-        [`traffic/commands/manual/${otherLight}`]: 'RED',
-      };
-      update(ref(database), updates);
+      set(ref(database, `traffic/commands/manual/${light}`), color.toUpperCase());
     }
   };
 

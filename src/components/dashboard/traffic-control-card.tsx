@@ -95,18 +95,18 @@ export default function TrafficControlCard({
             <h3 className="font-semibold text-lg">Robert Mugabe Rd</h3>
             <TrafficLight activeColor={nsColor} />
             <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200">Green</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200">Yellow</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200">Red</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200 disabled:opacity-40 disabled:cursor-not-allowed">Green</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed">Yellow</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200 disabled:opacity-40 disabled:cursor-not-allowed">Red</Button>
             </div>
           </div>
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Sam Munjoma St</h3>
             <TrafficLight activeColor={ewColor} />
              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200">Green</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200">Yellow</Button>
-                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200">Red</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200 disabled:opacity-40 disabled:cursor-not-allowed">Green</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200 disabled:opacity-40 disabled:cursor-not-allowed">Yellow</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200 disabled:opacity-40 disabled:cursor-not-allowed">Red</Button>
             </div>
           </div>
         </div>
