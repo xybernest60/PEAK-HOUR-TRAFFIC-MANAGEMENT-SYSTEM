@@ -1,17 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import {
   Car,
   CloudRain,
-  Server,
   ToggleLeft,
   Waypoints,
   Zap,
   ZapOff,
 } from "lucide-react";
-import type { ComponentProps } from "react";
 
 interface SystemStatusCardProps {
   status: {
@@ -19,7 +16,6 @@ interface SystemStatusCardProps {
     vehiclePresence: boolean;
     systemOnline: boolean;
   };
-  setStatus: (status: { systemOnline: boolean }) => void;
   currentPhase: string;
   phaseState: "green" | "yellow" | "red";
   isManualOverride: boolean;
@@ -49,7 +45,6 @@ const StatusItem = ({
 
 export default function SystemStatusCard({
   status,
-  setStatus,
   currentPhase,
   phaseState,
   isManualOverride,
@@ -71,20 +66,18 @@ export default function SystemStatusCard({
         <CardTitle>System Status</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
-        <div className="flex items-center justify-between rounded-lg bg-background p-3">
-          <div className="flex items-center gap-3">
-            {status.systemOnline ? (
-              <Zap className="h-5 w-5 text-green-400" />
-            ) : (
-              <ZapOff className="h-5 w-5 text-red-500" />
-            )}
-            <span className="font-medium">System Power</span>
-          </div>
-          <Switch
-            checked={status.systemOnline}
-            onCheckedChange={(checked) => setStatus({ systemOnline: checked })}
-            aria-label="Toggle system power"
-          />
+         <div className="flex items-center justify-between rounded-lg bg-background p-3">
+            <div className="flex items-center gap-3">
+                {status.systemOnline ? (
+                <Zap className="h-5 w-5 text-green-400" />
+                ) : (
+                <ZapOff className="h-5 w-5 text-red-500" />
+                )}
+                <span className="font-medium">System Status</span>
+            </div>
+             <span className={`font-mono text-sm font-bold ${status.systemOnline ? "text-green-400" : "text-red-500"}`}>
+                {status.systemOnline ? "Online" : "Offline"}
+            </span>
         </div>
 
         <StatusItem

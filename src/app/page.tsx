@@ -34,7 +34,7 @@ export default function DashboardPage() {
   const [systemStatus, setSystemStatus] = React.useState({
     rainDetected: false,
     vehiclePresence: true,
-    systemOnline: true,
+    systemOnline: false, // Start as offline
   });
 
   const [currentPhase, setCurrentPhase] = React.useState("R1_GREEN");
@@ -44,6 +44,8 @@ export default function DashboardPage() {
   const [light2Timer, setLight2Timer] = React.useState(0);
   const [mode, setMode] = React.useState("AUTO");
   const [smsConfig, setSmsConfig] = React.useState({ enabled: false, phoneNumber: '' });
+
+  const lastHeartbeatRef = React.useRef<number>(Date.now());
 
 
   React.useEffect(() => {
@@ -81,17 +83,24 @@ export default function DashboardPage() {
         }
 
         // System Status & Sensors
-        setSystemStatus({
+        setSystemStatus(prevStatus => ({
+          ...prevStatus,
           rainDetected: data.sensors.rain.detected,
           vehiclePresence: data.sensors.ir1.present || data.sensors.ir2.present,
-          systemOnline: data.system.online,
-        });
+        }));
         
         // SMS Alerts
         setSmsConfig(data.alerts.gsm);
+
+        // Heartbeat
+        if(data.system.heartbeat_ms) {
+            lastHeartbeatRef.current = Date.now();
+            setSystemStatus(prev => ({...prev, systemOnline: true}));
+        }
       }
     }, (error) => {
       console.error(error);
+      setSystemStatus(prev => ({...prev, systemOnline: false}));
       toast({
         variant: "destructive",
         title: "Database Error",
@@ -99,7 +108,16 @@ export default function DashboardPage() {
       });
     });
 
-    return () => unsubscribe();
+    const interval = setInterval(() => {
+        if (Date.now() - lastHeartbeatRef.current > 5000) {
+            setSystemStatus(prev => ({...prev, systemOnline: false}));
+        }
+    }, 2000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+    }
   }, [toast]);
 
 
@@ -127,7 +145,9 @@ export default function DashboardPage() {
 
   const handleManualLightChange = (light: 'light1' | 'light2', color: LightColor) => {
     if (isManualOverride) {
-      set(ref(database, `traffic/commands/manual/${light}`), color.toUpperCase());
+      update(ref(database), {
+          [`traffic/commands/manual/${light}`]: color.toUpperCase()
+      });
     }
   };
 
@@ -198,7 +218,6 @@ export default function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <SystemStatusCard 
             status={systemStatus} 
-            setStatus={(statusUpdate) => set(ref(database, 'traffic/system/online'), statusUpdate.systemOnline)}
             currentPhase={currentPhase} 
             phaseState={getPhaseState()}
             isManualOverride={isManualOverride} 
