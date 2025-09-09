@@ -8,17 +8,27 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import * as React from "react";
 
 const Light = ({ color, active }: { color: string; active: boolean }) => {
   return (
     <div
       className={cn(
-        "h-10 w-10 rounded-full transition-all duration-300",
+        "h-10 w-10 rounded-full transition-all duration-300 border-2 border-card",
         active ? "bg-opacity-100 shadow-[0_0_15px_3px_var(--light-color)]" : "bg-opacity-20",
       )}
       style={{ backgroundColor: color, "--light-color": color } as React.CSSProperties}
@@ -26,15 +36,14 @@ const Light = ({ color, active }: { color: string; active: boolean }) => {
   );
 };
 
-const TrafficLight = ({ activeColor, onManualChange, isManual, lightId }: { activeColor: LightColor, onManualChange: (color: LightColor) => void, isManual: boolean, lightId: 'light1' | 'light2' }) => {
-  const colors: LightColor[] = ["red", "yellow", "green"];
+const TrafficLight = ({ activeColor }: { activeColor: LightColor }) => {
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg bg-background p-2 border">
-       <div className={cn("flex flex-col items-center gap-2 rounded-lg bg-background p-2", isManual && "cursor-pointer")}>
-        <div onClick={() => isManual && onManualChange('red')} className="p-1"><Light color="#ef4444" active={activeColor === "red"} /></div>
-        <div onClick={() => isManual && onManualChange('yellow')} className="p-1"><Light color="#f59e0b" active={activeColor === "yellow"} /></div>
-        <div onClick={() => isManual && onManualChange('green')} className="p-1"><Light color="#22c55e" active={activeColor === "green"} /></div>
-    </div>
+       <div className="flex flex-col items-center gap-2 rounded-lg bg-background p-2">
+        <Light color="#ef4444" active={activeColor === "red"} />
+        <Light color="#f59e0b" active={activeColor === "yellow"} />
+        <Light color="#22c55e" active={activeColor === "green"} />
+      </div>
     </div>
   );
 };
@@ -62,6 +71,16 @@ export default function TrafficControlCard({
   setPeakHour,
   onManualLightChange,
 }: TrafficControlCardProps) {
+    const [showManualModeAlert, setShowManualModeAlert] = React.useState(false);
+
+    const handleButtonClick = (light: 'light1' | 'light2', color: LightColor) => {
+        if (isManualOverride) {
+            onManualLightChange(light, color);
+        } else {
+            setShowManualModeAlert(true);
+        }
+    }
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -71,24 +90,24 @@ export default function TrafficControlCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Robert Mugabe Rd</h3>
-            <TrafficLight 
-              activeColor={nsColor}
-              onManualChange={(color) => onManualLightChange('light1', color)}
-              isManual={isManualOverride}
-              lightId="light1"
-            />
+            <TrafficLight activeColor={nsColor} />
+            <div className="flex space-x-2">
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200">Green</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200">Yellow</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light1', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200">Red</Button>
+            </div>
           </div>
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Sam Munjoma St</h3>
-            <TrafficLight 
-              activeColor={ewColor} 
-              onManualChange={(color) => onManualLightChange('light2', color)}
-              isManual={isManualOverride}
-              lightId="light2"
-            />
+            <TrafficLight activeColor={ewColor} />
+             <div className="flex space-x-2">
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'green')} disabled={!isManualOverride} className="bg-green-500/20 hover:bg-green-500/40 text-green-200">Green</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'yellow')} disabled={!isManualOverride} className="bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-200">Yellow</Button>
+                <Button variant="outline" size="sm" onClick={() => handleButtonClick('light2', 'red')} disabled={!isManualOverride} className="bg-red-500/20 hover:bg-red-500/40 text-red-200">Red</Button>
+            </div>
           </div>
         </div>
         <div className="space-y-3">
@@ -120,6 +139,21 @@ export default function TrafficControlCard({
           </div>
         </div>
       </CardContent>
+       <AlertDialog open={showManualModeAlert} onOpenChange={setShowManualModeAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Automatic Mode Active</AlertDialogTitle>
+            <AlertDialogDescription>
+              To manually control the lights, please enable "Manual Override" mode first using the toggle switch.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowManualModeAlert(false)}>
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
