@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Settings } from "lucide-react";
 import * as React from "react";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface ConfigurationSheetProps {
   timingConfig: TimingConfig;
@@ -76,116 +77,118 @@ export default function ConfigurationSheet({
           <span className="sr-only">Configuration</span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full max-w-sm sm:max-w-md">
+      <SheetContent className="w-full max-w-sm sm:max-w-md flex flex-col">
         <SheetHeader>
           <SheetTitle>System Configuration</SheetTitle>
           <SheetDescription>
             Adjust system parameters for the traffic light controller.
           </SheetDescription>
         </SheetHeader>
-        <div className="grid gap-6 py-6">
-          <div>
-            <h3 className="text-lg font-medium mb-4">Timing (seconds)</h3>
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="normalGreenTime" className="text-right">
-                  Normal Green
-                </Label>
-                <Input
-                  id="normalGreenTime"
-                  name="normalGreenTime"
-                  type="number"
-                  value={localTimingConfig.normalGreenTime}
-                  onChange={handleTimingChange}
-                />
-              </div>
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="rainGreenTime" className="text-right">
-                  Rain Green
-                </Label>
-                <Input
-                  id="rainGreenTime"
-                  name="rainGreenTime"
-                  type="number"
-                  value={localTimingConfig.rainGreenTime}
-                  onChange={handleTimingChange}
-                />
-              </div>
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="minGreenTime" className="text-right">
-                  Min Green
-                </Label>
-                <Input
-                  id="minGreenTime"
-                  name="minGreenTime"
-                  type="number"
-                  value={localTimingConfig.minGreenTime}
-                  onChange={handleTimingChange}
-                />
-              </div>
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="allRedTime" className="text-right">
-                  All-Red
-                </Label>
-                <Input
-                  id="allRedTime"
-                  name="allRedTime"
-                  type="number"
-                  value={localTimingConfig.allRedTime}
-                  onChange={handleTimingChange}
-                />
-              </div>
+        <ScrollArea className="flex-grow">
+            <div className="grid gap-6 py-6 pr-4">
+            <div>
+                <h3 className="text-lg font-medium mb-4">Timing (seconds)</h3>
+                <div className="grid gap-4">
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="normalGreenTime" className="text-right">
+                    Normal Green
+                    </Label>
+                    <Input
+                    id="normalGreenTime"
+                    name="normalGreenTime"
+                    type="number"
+                    value={localTimingConfig.normalGreenTime}
+                    onChange={handleTimingChange}
+                    />
+                </div>
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="rainGreenTime" className="text-right">
+                    Rain Green
+                    </Label>
+                    <Input
+                    id="rainGreenTime"
+                    name="rainGreenTime"
+                    type="number"
+                    value={localTimingConfig.rainGreenTime}
+                    onChange={handleTimingChange}
+                    />
+                </div>
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="minGreenTime" className="text-right">
+                    Min Green
+                    </Label>
+                    <Input
+                    id="minGreenTime"
+                    name="minGreenTime"
+                    type="number"
+                    value={localTimingConfig.minGreenTime}
+                    onChange={handleTimingChange}
+                    />
+                </div>
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="allRedTime" className="text-right">
+                    All-Red
+                    </Label>
+                    <Input
+                    id="allRedTime"
+                    name="allRedTime"
+                    type="number"
+                    value={localTimingConfig.allRedTime}
+                    onChange={handleTimingChange}
+                    />
+                </div>
+                </div>
             </div>
-          </div>
-          <Separator />
-           <div>
-            <h3 className="text-lg font-medium mb-4">Peak Hours</h3>
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="start" className="text-right">
-                  Start Time
-                </Label>
-                <Input
-                  id="start"
-                  name="start"
-                  type="time"
-                  value={localPeakHourConfig.start}
-                  onChange={handlePeakHourChange}
-                />
-              </div>
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="end" className="text-right">
-                  End Time
-                </Label>
-                <Input
-                  id="end"
-                  name="end"
-                  type="time"
-                  value={localPeakHourConfig.end}
-                  onChange={handlePeakHourChange}
-                />
-              </div>
+            <Separator />
+            <div>
+                <h3 className="text-lg font-medium mb-4">Peak Hours</h3>
+                <div className="grid gap-4">
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="start" className="text-right">
+                    Start Time
+                    </Label>
+                    <Input
+                    id="start"
+                    name="start"
+                    type="time"
+                    value={localPeakHourConfig.start}
+                    onChange={handlePeakHourChange}
+                    />
+                </div>
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="end" className="text-right">
+                    End Time
+                    </Label>
+                    <Input
+                    id="end"
+                    name="end"
+                    type="time"
+                    value={localPeakHourConfig.end}
+                    onChange={handlePeakHourChange}
+                    />
+                </div>
+                </div>
             </div>
-          </div>
-           <Separator />
-           <div>
-            <h3 className="text-lg font-medium mb-4">GSM Alerts</h3>
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="phone-number" className="text-right">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone-number"
-                  placeholder="+263 7..."
-                  type="tel"
-                  value={localSmsPhoneNumber}
-                  onChange={(e) => setLocalSmsPhoneNumber(e.target.value)}
-                />
-              </div>
+            <Separator />
+            <div>
+                <h3 className="text-lg font-medium mb-4">GSM Alerts</h3>
+                <div className="grid gap-4">
+                <div className="grid grid-cols-2 items-center gap-4">
+                    <Label htmlFor="phone-number" className="text-right">
+                    Phone Number
+                    </Label>
+                    <Input
+                    id="phone-number"
+                    placeholder="+263 7..."
+                    type="tel"
+                    value={localSmsPhoneNumber || ""}
+                    onChange={(e) => setLocalSmsPhoneNumber(e.target.value)}
+                    />
+                </div>
+                </div>
             </div>
-          </div>
-        </div>
+            </div>
+        </ScrollArea>
         <SheetFooter>
           <SheetClose asChild>
             <Button onClick={handleSave}>Save Changes</Button>

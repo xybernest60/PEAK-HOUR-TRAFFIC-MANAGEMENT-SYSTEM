@@ -73,20 +73,6 @@ export default function SystemStatusCard({
         <CardTitle>System Status</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
-         <div className="flex items-center justify-between rounded-lg bg-card p-3 transition-all hover:bg-muted/50">
-            <div className="flex items-center gap-3">
-                {status.systemOnline ? (
-                <Zap className="h-5 w-5 text-green-400 animate-pulse" />
-                ) : (
-                <ZapOff className="h-5 w-5 text-red-500" />
-                )}
-                <span className="font-medium">System Status</span>
-            </div>
-             <span className={cn("font-mono text-sm font-bold", status.systemOnline ? "text-green-400" : "text-red-500")}>
-                {status.systemOnline ? "Online" : "Offline"}
-            </span>
-        </div>
-
         <StatusItem
           icon={CloudRain}
           label="Rain Detection"
