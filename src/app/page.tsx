@@ -11,9 +11,10 @@ import { ref, onValue, set, update } from "firebase/database";
 
 export interface Config {
   normalGreenTime: number;
-  peakGreenTime: number;
-  yellowTime: number; 
+  rainGreenTime: number;
+  yellowTime: number;
   allRedTime: number;
+  minGreenTime: number;
 }
 
 export type LightColor = "green" | "yellow" | "red";
@@ -23,9 +24,10 @@ export default function DashboardPage() {
 
   const [config, setConfig] = React.useState<Config>({
     normalGreenTime: 20,
-    peakGreenTime: 30,
+    rainGreenTime: 30,
     yellowTime: 3,
     allRedTime: 2,
+    minGreenTime: 5,
   });
 
   const [isPeakHour, setIsPeakHour] = React.useState(false);
@@ -58,9 +60,10 @@ export default function DashboardPage() {
         const dbConfig = data.config.delays_s;
         setConfig({
           normalGreenTime: dbConfig.normal_green,
-          peakGreenTime: dbConfig.rain_green, 
+          rainGreenTime: dbConfig.rain_green,
           yellowTime: 3, // This seems to be static based on previous files.
           allRedTime: dbConfig.all_red,
+          minGreenTime: dbConfig.min_green,
         });
 
         // State & Manual Override
@@ -126,8 +129,9 @@ export default function DashboardPage() {
   const handleConfigSave = (newConfig: Config) => {
     const updates = {
       'traffic/config/delays_s/normal_green': newConfig.normalGreenTime,
-      'traffic/config/delays_s/rain_green': newConfig.peakGreenTime,
+      'traffic/config/delays_s/rain_green': newConfig.rainGreenTime,
       'traffic/config/delays_s/all_red': newConfig.allRedTime,
+      'traffic/config/delays_s/min_green': newConfig.minGreenTime,
     };
     update(ref(database), updates)
       .then(() => {
@@ -201,7 +205,7 @@ export default function DashboardPage() {
 
     let maxTime = config.normalGreenTime;
     if(phaseState === 'green'){
-      maxTime = isPeakHour ? config.peakGreenTime : config.normalGreenTime
+      maxTime = isPeakHour ? config.rainGreenTime : config.normalGreenTime
     } else if (phaseState === 'yellow'){
       maxTime = config.yellowTime
     } else {

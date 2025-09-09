@@ -72,30 +72,29 @@ export default function ConfigurationSheet({
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="peakGreenTime" className="text-right col-span-2">
-              Peak Green Time
+            <Label htmlFor="rainGreenTime" className="text-right col-span-2">
+              Rain Green Time
             </Label>
             <Input
-              id="peakGreenTime"
-              name="peakGreenTime"
+              id="rainGreenTime"
+              name="rainGreenTime"
               type="number"
-              value={localConfig.peakGreenTime}
+              value={localConfig.rainGreenTime}
               onChange={handleChange}
               className="col-span-2"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="yellowTime" className="text-right col-span-2">
-              Yellow Time
+            <Label htmlFor="minGreenTime" className="text-right col-span-2">
+              Min Green Time
             </Label>
             <Input
-              id="yellowTime"
-              name="yellowTime"
+              id="minGreenTime"
+              name="minGreenTime"
               type="number"
-              value={localConfig.yellowTime}
+              value={localConfig.minGreenTime}
               onChange={handleChange}
               className="col-span-2"
-              disabled // Not in DB
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
