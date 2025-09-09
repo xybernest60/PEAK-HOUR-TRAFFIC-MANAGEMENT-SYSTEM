@@ -71,7 +71,7 @@ export default function TrafficControlCard({
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div className="flex flex-col items-center gap-4">
-            <h3 className="font-semibold text-lg">North-South</h3>
+            <h3 className="font-semibold text-lg">Robert Mugabe Rd</h3>
             <TrafficLight activeColor={nsColor} />
             {isManualOverride && (
               <Button size="sm" variant="outline" onClick={() => onManualLightChange('NS')} disabled={nsColor === 'green'}>
@@ -80,7 +80,7 @@ export default function TrafficControlCard({
             )}
           </div>
           <div className="flex flex-col items-center gap-4">
-            <h3 className="font-semibold text-lg">East-West</h3>
+            <h3 className="font-semibold text-lg">Sam Munjoma St</h3>
             <TrafficLight activeColor={ewColor} />
             {isManualOverride && (
                <Button size="sm" variant="outline" onClick={() => onManualLightChange('EW')} disabled={ewColor === 'green'}>
