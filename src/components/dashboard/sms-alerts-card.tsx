@@ -17,25 +17,25 @@ import * as React from "react";
 interface SmsAlertsCardProps {
   phoneNumber: string;
   isEnabled: boolean;
-  onSave: (config: { phoneNumber: string; isEnabled: boolean }) => void;
+  onNumberSave: (phoneNumber: string) => void;
+  onEnabledChange: (isEnabled: boolean) => void;
 }
 
 export default function SmsAlertsCard({
   phoneNumber,
   isEnabled,
-  onSave,
+  onNumberSave,
+  onEnabledChange,
 }: SmsAlertsCardProps) {
   const [localPhoneNumber, setLocalPhoneNumber] = React.useState(phoneNumber || "");
-  const [localIsEnabled, setLocalIsEnabled] = React.useState(isEnabled);
 
   React.useEffect(() => {
     setLocalPhoneNumber(phoneNumber || "");
-    setLocalIsEnabled(isEnabled);
-  }, [phoneNumber, isEnabled]);
+  }, [phoneNumber]);
 
 
   const handleSave = () => {
-    onSave({ phoneNumber: localPhoneNumber, isEnabled: localIsEnabled });
+    onNumberSave(localPhoneNumber);
   };
 
   return (
@@ -51,7 +51,7 @@ export default function SmsAlertsCard({
           <Label htmlFor="phone-number">Phone Number</Label>
           <Input
             id="phone-number"
-            placeholder="+1 (555) 123-4567"
+            placeholder="+263 7..."
             type="tel"
             value={localPhoneNumber}
             onChange={(e) => setLocalPhoneNumber(e.target.value)}
@@ -60,15 +60,15 @@ export default function SmsAlertsCard({
         <div className="flex items-center space-x-2">
           <Switch
             id="sms-enabled"
-            checked={localIsEnabled}
-            onCheckedChange={setLocalIsEnabled}
+            checked={isEnabled}
+            onCheckedChange={onEnabledChange}
           />
           <Label htmlFor="sms-enabled">Enable SMS Alerts</Label>
         </div>
       </CardContent>
       <CardFooter>
         <Button onClick={handleSave} className="w-full">
-          Save Preferences
+          Save Phone Number
         </Button>
       </CardFooter>
     </Card>

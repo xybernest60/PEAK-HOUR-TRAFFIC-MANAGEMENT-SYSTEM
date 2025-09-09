@@ -165,16 +165,12 @@ export default function DashboardPage() {
     set(ref(database, 'traffic/config/peak_hour/manual_toggle'), peak);
   };
 
-  const handleSmsConfigSave = (newSmsConfig: {phoneNumber: string, isEnabled: boolean}) => {
-     const updates = {
-      'traffic/alerts/gsm/enabled': newSmsConfig.isEnabled,
-      'traffic/alerts/gsm/phone_number': newSmsConfig.phoneNumber,
-    };
-    update(ref(database), updates)
+  const handleSmsNumberSave = (newPhoneNumber: string) => {
+     update(ref(database), {'traffic/alerts/gsm/phone_number': newPhoneNumber})
       .then(() => {
         toast({
-          title: "SMS Alerts Updated",
-          description: `Notifications preferences have been saved.`,
+          title: "SMS Number Saved",
+          description: `The phone number has been updated.`,
         });
       })
       .catch((error) => {
@@ -186,6 +182,10 @@ export default function DashboardPage() {
       });
   }
   
+  const handleSmsEnabledChange = (isEnabled: boolean) => {
+    set(ref(database, 'traffic/alerts/gsm/enabled'), isEnabled);
+  }
+
   const getPhaseState = () => {
     if (currentPhase.includes('YELLOW')) return 'yellow';
     if (currentPhase.includes('GREEN')) return 'green';
@@ -244,7 +244,8 @@ export default function DashboardPage() {
           <SmsAlertsCard
             phoneNumber={smsConfig.phoneNumber}
             isEnabled={smsConfig.enabled}
-            onSave={handleSmsConfigSave}
+            onNumberSave={handleSmsNumberSave}
+            onEnabledChange={handleSmsEnabledChange}
           />
         </div>
       </main>
