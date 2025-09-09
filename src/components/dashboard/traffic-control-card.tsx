@@ -58,6 +58,8 @@ interface TrafficControlCardProps {
   isPeakHour: boolean;
   setPeakHour: (value: boolean) => void;
   onManualLightChange: (light: 'light1' | 'light2', color: LightColor) => void;
+  isSmsEnabled: boolean;
+  setSmsEnabled: (value: boolean) => void;
 }
 
 export default function TrafficControlCard({
@@ -70,6 +72,8 @@ export default function TrafficControlCard({
   isPeakHour,
   setPeakHour,
   onManualLightChange,
+  isSmsEnabled,
+  setSmsEnabled,
 }: TrafficControlCardProps) {
     const [showManualModeAlert, setShowManualModeAlert] = React.useState(false);
 
@@ -136,6 +140,14 @@ export default function TrafficControlCard({
               disabled={isManualOverride}
             />
             <Label htmlFor="peak-hour">Peak Hour Mode</Label>
+          </div>
+           <div className="flex items-center space-x-2">
+            <Switch
+              id="sms-enabled"
+              checked={isSmsEnabled}
+              onCheckedChange={setSmsEnabled}
+            />
+            <Label htmlFor="sms-enabled">SMS Alerts</Label>
           </div>
         </div>
       </CardContent>

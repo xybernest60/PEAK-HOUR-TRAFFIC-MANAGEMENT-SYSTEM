@@ -4,7 +4,6 @@ import * as React from "react";
 import Header from "@/components/dashboard/header";
 import SystemStatusCard from "@/components/dashboard/system-status-card";
 import TrafficControlCard from "@/components/dashboard/traffic-control-card";
-import SmsAlertsCard from "@/components/dashboard/sms-alerts-card";
 import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/firebase";
 import { ref, onValue, set, update } from "firebase/database";
@@ -273,14 +272,14 @@ export default function DashboardPage() {
         onSmsNumberSave={handleSmsNumberSave}
       />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           <SystemStatusCard 
             status={systemStatus} 
             currentPhase={currentPhase} 
             phaseState={getPhaseState()}
             isManualOverride={isManualOverride} 
           />
-          <div className="lg:col-span-2 xl:col-span-2">
+          <div className="lg:col-span-1 xl:col-span-2">
             <TrafficControlCard
               nsColor={light1Status}
               ewColor={light2Status}
@@ -291,12 +290,10 @@ export default function DashboardPage() {
               isPeakHour={isManualPeakHour}
               setPeakHour={handleSetManualPeakHour}
               onManualLightChange={handleManualLightChange}
+              isSmsEnabled={smsConfig.enabled}
+              setSmsEnabled={handleSmsEnabledChange}
             />
           </div>
-          <SmsAlertsCard
-            isEnabled={smsConfig.enabled}
-            onEnabledChange={handleSmsEnabledChange}
-          />
         </div>
       </main>
     </div>
