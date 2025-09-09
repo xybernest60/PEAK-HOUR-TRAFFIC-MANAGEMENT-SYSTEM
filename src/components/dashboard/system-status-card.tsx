@@ -13,7 +13,8 @@ import {
 interface SystemStatusCardProps {
   status: {
     rainDetected: boolean;
-    vehiclePresence: boolean;
+    vehiclePresence1: boolean;
+    vehiclePresence2: boolean;
     systemOnline: boolean;
   };
   currentPhase: string;
@@ -88,9 +89,15 @@ export default function SystemStatusCard({
         />
         <StatusItem
           icon={Car}
-          label="Vehicle Presence"
-          value={status.vehiclePresence ? "Detected" : "None"}
-          valueClass={status.vehiclePresence ? "text-primary" : "text-muted-foreground"}
+          label="R. Mugabe Presence"
+          value={status.vehiclePresence1 ? "Detected" : "None"}
+          valueClass={status.vehiclePresence1 ? "text-primary" : "text-muted-foreground"}
+        />
+         <StatusItem
+          icon={Car}
+          label="S. Munjoma Presence"
+          value={status.vehiclePresence2 ? "Detected" : "None"}
+          valueClass={status.vehiclePresence2 ? "text-primary" : "text-muted-foreground"}
         />
         <StatusItem
           icon={Waypoints}

@@ -33,7 +33,8 @@ export default function DashboardPage() {
   
   const [systemStatus, setSystemStatus] = React.useState({
     rainDetected: false,
-    vehiclePresence: true,
+    vehiclePresence1: false,
+    vehiclePresence2: false,
     systemOnline: false, // Start as offline
   });
 
@@ -86,7 +87,8 @@ export default function DashboardPage() {
         setSystemStatus(prevStatus => ({
           ...prevStatus,
           rainDetected: data.sensors.rain.detected,
-          vehiclePresence: data.sensors.ir1.present || data.sensors.ir2.present,
+          vehiclePresence1: data.sensors.ir1.present,
+          vehiclePresence2: data.sensors.ir2.present,
         }));
         
         // SMS Alerts
