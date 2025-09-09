@@ -22,6 +22,11 @@ export interface PeakHourConfig {
   end: string;
 }
 
+export interface SmsConfig {
+  enabled: boolean;
+  phoneNumber: string;
+}
+
 export type LightColor = "green" | "yellow" | "red";
 
 export default function DashboardPage() {
@@ -57,7 +62,7 @@ export default function DashboardPage() {
   const [light1Timer, setLight1Timer] = React.useState(0);
   const [light2Timer, setLight2Timer] = React.useState(0);
   const [mode, setMode] = React.useState("AUTO");
-  const [smsConfig, setSmsConfig] = React.useState({ enabled: false, phoneNumber: '' });
+  const [smsConfig, setSmsConfig] = React.useState<SmsConfig>({ enabled: false, phoneNumber: '' });
 
   const lastHeartbeatRef = React.useRef<number>(Date.now());
 
@@ -209,8 +214,8 @@ export default function DashboardPage() {
      update(ref(database), {'traffic/alerts/gsm/phone_number': newPhoneNumber})
       .then(() => {
         toast({
-          title: "SMS Number Saved",
-          description: `The phone number has been updated.`,
+          title: "Phone Number Saved",
+          description: `The phone number for alerts has been updated.`,
         });
       })
       .catch((error) => {
@@ -262,8 +267,10 @@ export default function DashboardPage() {
       <Header 
         timingConfig={timingConfig} 
         peakHourConfig={peakHourConfig}
+        smsConfig={smsConfig}
         onTimingConfigSave={handleTimingConfigSave}
         onPeakHourConfigSave={handlePeakHourConfigSave}
+        onSmsNumberSave={handleSmsNumberSave}
       />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -287,9 +294,7 @@ export default function DashboardPage() {
             />
           </div>
           <SmsAlertsCard
-            phoneNumber={smsConfig.phoneNumber}
             isEnabled={smsConfig.enabled}
-            onNumberSave={handleSmsNumberSave}
             onEnabledChange={handleSmsEnabledChange}
           />
         </div>

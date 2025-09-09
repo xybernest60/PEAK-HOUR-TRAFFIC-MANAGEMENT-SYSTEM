@@ -1,18 +1,18 @@
 "use client";
 
-import type { TimingConfig, PeakHourConfig } from "@/app/page";
+import type { TimingConfig, PeakHourConfig, SmsConfig } from "@/app/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Settings } from "lucide-react";
@@ -21,18 +21,23 @@ import * as React from "react";
 interface ConfigurationSheetProps {
   timingConfig: TimingConfig;
   peakHourConfig: PeakHourConfig;
+  smsConfig: SmsConfig;
   onTimingConfigSave: (config: TimingConfig) => void;
   onPeakHourConfigSave: (config: PeakHourConfig) => void;
+  onSmsNumberSave: (phoneNumber: string) => void;
 }
 
 export default function ConfigurationSheet({
   timingConfig,
   peakHourConfig,
+  smsConfig,
   onTimingConfigSave,
   onPeakHourConfigSave,
+  onSmsNumberSave,
 }: ConfigurationSheetProps) {
   const [localTimingConfig, setLocalTimingConfig] = React.useState(timingConfig);
   const [localPeakHourConfig, setLocalPeakHourConfig] = React.useState(peakHourConfig);
+  const [localSmsPhoneNumber, setLocalSmsPhoneNumber] = React.useState(smsConfig.phoneNumber);
 
   React.useEffect(() => {
     setLocalTimingConfig(timingConfig);
@@ -41,10 +46,16 @@ export default function ConfigurationSheet({
   React.useEffect(() => {
     setLocalPeakHourConfig(peakHourConfig);
   }, [peakHourConfig]);
+  
+  React.useEffect(() => {
+    setLocalSmsPhoneNumber(smsConfig.phoneNumber || "");
+  }, [smsConfig.phoneNumber]);
+
 
   const handleSave = () => {
     onTimingConfigSave(localTimingConfig);
     onPeakHourConfigSave(localPeakHourConfig);
+    onSmsNumberSave(localSmsPhoneNumber);
   };
 
   const handleTimingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +76,7 @@ export default function ConfigurationSheet({
           <span className="sr-only">Configuration</span>
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-full max-w-sm sm:max-w-md">
         <SheetHeader>
           <SheetTitle>System Configuration</SheetTitle>
           <SheetDescription>
@@ -76,9 +87,9 @@ export default function ConfigurationSheet({
           <div>
             <h3 className="text-lg font-medium mb-4">Timing (seconds)</h3>
             <div className="grid gap-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="normalGreenTime" className="text-right col-span-2">
-                  Normal Green Time
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="normalGreenTime" className="text-right">
+                  Normal Green
                 </Label>
                 <Input
                   id="normalGreenTime"
@@ -86,12 +97,11 @@ export default function ConfigurationSheet({
                   type="number"
                   value={localTimingConfig.normalGreenTime}
                   onChange={handleTimingChange}
-                  className="col-span-2"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="rainGreenTime" className="text-right col-span-2">
-                  Rain Green Time
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="rainGreenTime" className="text-right">
+                  Rain Green
                 </Label>
                 <Input
                   id="rainGreenTime"
@@ -99,12 +109,11 @@ export default function ConfigurationSheet({
                   type="number"
                   value={localTimingConfig.rainGreenTime}
                   onChange={handleTimingChange}
-                  className="col-span-2"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="minGreenTime" className="text-right col-span-2">
-                  Min Green Time
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="minGreenTime" className="text-right">
+                  Min Green
                 </Label>
                 <Input
                   id="minGreenTime"
@@ -112,12 +121,11 @@ export default function ConfigurationSheet({
                   type="number"
                   value={localTimingConfig.minGreenTime}
                   onChange={handleTimingChange}
-                  className="col-span-2"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="allRedTime" className="text-right col-span-2">
-                  All-Red Time
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="allRedTime" className="text-right">
+                  All-Red
                 </Label>
                 <Input
                   id="allRedTime"
@@ -125,7 +133,6 @@ export default function ConfigurationSheet({
                   type="number"
                   value={localTimingConfig.allRedTime}
                   onChange={handleTimingChange}
-                  className="col-span-2"
                 />
               </div>
             </div>
@@ -134,8 +141,8 @@ export default function ConfigurationSheet({
            <div>
             <h3 className="text-lg font-medium mb-4">Peak Hours</h3>
             <div className="grid gap-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="start" className="text-right col-span-2">
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="start" className="text-right">
                   Start Time
                 </Label>
                 <Input
@@ -144,11 +151,10 @@ export default function ConfigurationSheet({
                   type="time"
                   value={localPeakHourConfig.start}
                   onChange={handlePeakHourChange}
-                  className="col-span-2"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="end" className="text-right col-span-2">
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="end" className="text-right">
                   End Time
                 </Label>
                 <Input
@@ -157,7 +163,24 @@ export default function ConfigurationSheet({
                   type="time"
                   value={localPeakHourConfig.end}
                   onChange={handlePeakHourChange}
-                  className="col-span-2"
+                />
+              </div>
+            </div>
+          </div>
+           <Separator />
+           <div>
+            <h3 className="text-lg font-medium mb-4">GSM Alerts</h3>
+            <div className="grid gap-4">
+              <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="phone-number" className="text-right">
+                  Phone Number
+                </Label>
+                <Input
+                  id="phone-number"
+                  placeholder="+263 7..."
+                  type="tel"
+                  value={localSmsPhoneNumber}
+                  onChange={(e) => setLocalSmsPhoneNumber(e.target.value)}
                 />
               </div>
             </div>
