@@ -33,10 +33,10 @@ export default function LoginPage() {
   };
 
   React.useEffect(() => {
-    if (user) {
-      router.push("/dashboard");
+    if (user || emailUser || googleUser) {
+        router.push("/dashboard");
     }
-  }, [user, router]);
+  }, [user, emailUser, googleUser, router]);
 
   React.useEffect(() => {
     if (error) {
