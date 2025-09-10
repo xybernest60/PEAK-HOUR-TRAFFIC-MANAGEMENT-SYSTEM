@@ -18,7 +18,6 @@ interface SystemStatusCardProps {
     vehiclePresence2: boolean;
   };
   currentPhase: string;
-  phaseState: "green" | "yellow" | "red" | "amber";
   isManualOverride: boolean;
   isPeakHour: boolean;
 }
@@ -26,21 +25,9 @@ interface SystemStatusCardProps {
 export default function SystemStatusCard({
   status,
   currentPhase,
-  phaseState,
   isManualOverride,
   isPeakHour
 }: SystemStatusCardProps) {
-  
-  const getPhaseText = () => {
-    const phaseUpper = currentPhase.toUpperCase();
-    if (phaseUpper.includes('R1')) {
-       return `R. Mugabe Rd ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
-    }
-     if (phaseUpper.includes('R2')) {
-       return `S. Munjoma St ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
-    }
-    return phaseUpper.replace('_', ' ');
-  };
 
   return (
     <Card className="flex flex-col">
@@ -86,7 +73,7 @@ export default function SystemStatusCard({
          <StatusCard
           icon={Waypoints}
           title="Current Phase"
-          value={getPhaseText()}
+          value={currentPhase.replace('_', ' ')}
         />
       </CardContent>
     </Card>

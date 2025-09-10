@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Settings } from "lucide-react";
+import { Separator } from "../ui/separator";
 
 export interface TimingConfiguration {
   normalGreenTime: number;
@@ -21,6 +22,8 @@ export interface TimingConfiguration {
   rainGreenTime: number;
   yellowTime: number;
   allRedTime: number;
+  peakStartTime: string;
+  peakEndTime: string;
 }
 
 interface ConfigurationSheetProps {
@@ -45,8 +48,8 @@ export default function ConfigurationSheet({
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setLocalConfig(prev => ({...prev, [name]: Number(value) }));
+    const { name, value, type } = e.target;
+    setLocalConfig(prev => ({...prev, [name]: type === 'number' ? Number(value) : value }));
   }
 
   return (
@@ -86,6 +89,21 @@ export default function ConfigurationSheet({
             <div className="grid grid-cols-2 items-center gap-4">
                 <Label htmlFor="allRedTime">All-Red Time</Label>
                 <Input id="allRedTime" name="allRedTime" type="number" value={localConfig.allRedTime} onChange={handleInputChange} className="col-span-1" />
+            </div>
+          </div>
+
+          <Separator />
+          
+           <div className="space-y-4 rounded-md border p-4">
+             <h4 className="text-lg font-semibold">Peak Hour Schedule</h4>
+             <p className="text-sm text-muted-foreground">Automatically enable Peak Hour mode during this window.</p>
+            <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="peakStartTime">Start Time</Label>
+                <Input id="peakStartTime" name="peakStartTime" type="time" value={localConfig.peakStartTime} onChange={handleInputChange} className="col-span-1" />
+            </div>
+             <div className="grid grid-cols-2 items-center gap-4">
+                <Label htmlFor="peakEndTime">End Time</Label>
+                <Input id="peakEndTime" name="peakEndTime" type="time" value={localConfig.peakEndTime} onChange={handleInputChange} className="col-span-1" />
             </div>
           </div>
         </div>

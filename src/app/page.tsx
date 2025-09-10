@@ -20,6 +20,8 @@ export default function DashboardPage() {
     rainGreenTime: 7,
     yellowTime: 2,
     allRedTime: 1,
+    peakStartTime: "00:00",
+    peakEndTime: "00:00",
   });
 
   const [isManualOverride, setIsManualOverride] = React.useState(false);
@@ -47,8 +49,8 @@ export default function DashboardPage() {
         setIsManualOverride(data.mode === 'MANUAL');
         setIsPeakHour(data.peak_active === true);
         setCurrentPhase(data.current_phase || "UNKNOWN");
-        setLight1Status(data.light1 || "red");
-        setLight2Status(data.light2 || "red");
+        setLight1Status(data.light1?.toLowerCase() || "red");
+        setLight2Status(data.light2?.toLowerCase() || "red");
         setSystemStatus({
           rainDetected: data.rain === true,
           vehiclePresence1: data.ir1 === true,
@@ -60,6 +62,8 @@ export default function DashboardPage() {
             rainGreenTime: data.rain_green_delay || 7,
             yellowTime: data.yellow_delay || 2,
             allRedTime: data.all_red_delay || 1,
+            peakStartTime: data.peak_start_time || "00:00",
+            peakEndTime: data.peak_end_time || "00:00",
         });
       } else {
         setSystemOnline(false);
@@ -72,6 +76,38 @@ export default function DashboardPage() {
 
     return () => unsubscribe();
   }, [toast]);
+  
+  // Effect for automatic peak hour scheduling
+  React.useEffect(() => {
+    if (isManualOverride) return;
+
+    const checkPeakTime = () => {
+      const { peakStartTime, peakEndTime } = timingConfig;
+      if (!peakStartTime || !peakEndTime || peakStartTime === peakEndTime) {
+        return; 
+      }
+
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      
+      const [startHours, startMinutes] = peakStartTime.split(':').map(Number);
+      const startTime = startHours * 60 + startMinutes;
+      
+      const [endHours, endMinutes] = peakEndTime.split(':').map(Number);
+      const endTime = endHours * 60 + endMinutes;
+
+      const shouldBePeak = currentTime >= startTime && currentTime < endTime;
+
+      if (shouldBePeak !== isPeakHour) {
+         set(ref(database, 'traffic/state/peak_active'), shouldBePeak);
+      }
+    };
+
+    const intervalId = setInterval(checkPeakTime, 60000); // Check every minute
+    checkPeakTime();
+
+    return () => clearInterval(intervalId);
+  }, [timingConfig, isPeakHour, isManualOverride]);
 
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
@@ -82,6 +118,8 @@ export default function DashboardPage() {
           set(ref(database, 'traffic/state/rain_green_delay'), newConfig.rainGreenTime),
           set(ref(database, 'traffic/state/yellow_delay'), newConfig.yellowTime),
           set(ref(database, 'traffic/state/all_red_delay'), newConfig.allRedTime),
+          set(ref(database, 'traffic/state/peak_start_time'), newConfig.peakStartTime),
+          set(ref(database, 'traffic/state/peak_end_time'), newConfig.peakEndTime),
       ]);
       toast({ title: "Configuration saved successfully!" });
     } catch (error) {
@@ -128,14 +166,6 @@ export default function DashboardPage() {
     }
   };
 
-
-  const getPhaseState = (phase: string): LightColor => {
-    if (!phase) return 'red';
-    if (phase.includes('AMBER') || phase.includes('YELLOW')) return 'yellow';
-    if (phase.includes('GREEN')) return 'green';
-    return 'red';
-  }
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header systemOnline={systemOnline}>
@@ -157,7 +187,6 @@ export default function DashboardPage() {
           <SystemStatusCard
             status={systemStatus}
             currentPhase={currentPhase}
-            phaseState={getPhaseState(currentPhase)}
             isManualOverride={isManualOverride}
             isPeakHour={isPeakHour}
           />
