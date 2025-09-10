@@ -114,6 +114,18 @@ export default function ConfigurationSheet({
                     onChange={handleTimingChange}
                   />
                 </div>
+                 <div className="grid grid-cols-2 items-center gap-4">
+                  <Label htmlFor="peakGreenTime" className="text-right">
+                    Peak Green
+                  </Label>
+                  <Input
+                    id="peakGreenTime"
+                    name="peakGreenTime"
+                    type="number"
+                    value={localTimingConfig.peakGreenTime}
+                    onChange={handleTimingChange}
+                  />
+                </div>
                 <div className="grid grid-cols-2 items-center gap-4">
                   <Label htmlFor="rainGreenTime" className="text-right">
                     Rain Green
@@ -127,26 +139,26 @@ export default function ConfigurationSheet({
                   />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
-                  <Label htmlFor="minGreenTime" className="text-right">
-                    Min Green
+                  <Label htmlFor="amber" className="text-right">
+                    Amber
                   </Label>
                   <Input
-                    id="minGreenTime"
-                    name="minGreenTime"
+                    id="amber"
+                    name="amber"
                     type="number"
-                    value={localTimingConfig.minGreenTime}
+                    value={localTimingConfig.amber}
                     onChange={handleTimingChange}
                   />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
-                  <Label htmlFor="allRedTime" className="text-right">
-                    All-Red
+                  <Label htmlFor="red" className="text-right">
+                    Red Delay
                   </Label>
                   <Input
-                    id="allRedTime"
-                    name="allRedTime"
+                    id="red"
+                    name="red"
                     type="number"
-                    value={localTimingConfig.allRedTime}
+                    value={localTimingConfig.red}
                     onChange={handleTimingChange}
                   />
                 </div>
@@ -198,7 +210,7 @@ export default function ConfigurationSheet({
                   </Label>
                   <Input
                     id="phone-number"
-                    placeholder="+263 7..."
+                    placeholder="+263..."
                     type="tel"
                     value={localSmsPhoneNumber || ""}
                     onChange={(e) => setLocalSmsPhoneNumber(e.target.value)}

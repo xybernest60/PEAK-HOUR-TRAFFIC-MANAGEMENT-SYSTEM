@@ -11,9 +11,9 @@ import { ref, onValue, set, update } from "firebase/database";
 export interface TimingConfig {
   normalGreenTime: number;
   rainGreenTime: number;
-  yellowTime: number;
-  allRedTime: number;
-  minGreenTime: number;
+  peakGreenTime: number;
+  amber: number;
+  red: number;
 }
 
 export interface PeakHourConfig {
@@ -26,7 +26,7 @@ export interface SmsConfig {
   phoneNumber: string;
 }
 
-export type LightColor = "green" | "yellow" | "red";
+export type LightColor = "green" | "yellow" | "red" | "amber";
 
 export default function DashboardPage() {
   const { toast } = useToast();
@@ -34,9 +34,9 @@ export default function DashboardPage() {
   const [timingConfig, setTimingConfig] = React.useState<TimingConfig>({
     normalGreenTime: 20,
     rainGreenTime: 30,
-    yellowTime: 3,
-    allRedTime: 2,
-    minGreenTime: 5,
+    peakGreenTime: 40,
+    amber: 3,
+    red: 2,
   });
 
   const [peakHourConfig, setPeakHourConfig] = React.useState<PeakHourConfig>({
@@ -50,6 +50,7 @@ export default function DashboardPage() {
   
   const [systemStatus, setSystemStatus] = React.useState({
     rainDetected: false,
+    rainActive: false,
     vehiclePresence1: false,
     vehiclePresence2: false,
     systemOnline: false, // Start as offline
@@ -58,13 +59,10 @@ export default function DashboardPage() {
   const [currentPhase, setCurrentPhase] = React.useState("R1_GREEN");
   const [light1Status, setLight1Status] = React.useState<LightColor>("red");
   const [light2Status, setLight2Status] = React.useState<LightColor>("red");
-  const [light1Timer, setLight1Timer] = React.useState(0);
-  const [light2Timer, setLight2Timer] = React.useState(0);
+  const [timer, setTimer] = React.useState(0);
   const [mode, setMode] = React.useState("AUTO");
   const [smsConfig, setSmsConfig] = React.useState<SmsConfig>({ enabled: false, phoneNumber: '' });
-
-  const lastHeartbeatRef = React.useRef<number>(Date.now());
-
+  
 
   React.useEffect(() => {
     const trafficRef = ref(database, 'traffic');
@@ -76,9 +74,9 @@ export default function DashboardPage() {
         setTimingConfig({
           normalGreenTime: dbTimingConfig.normal_green,
           rainGreenTime: dbTimingConfig.rain_green,
-          yellowTime: 3, // This seems to be static
-          allRedTime: dbTimingConfig.all_red,
-          minGreenTime: dbTimingConfig.min_green,
+          peakGreenTime: dbTimingConfig.peak_green,
+          amber: dbTimingConfig.amber,
+          red: dbTimingConfig.red,
         });
 
         const dbPeakConfig = data.config.peak_hour;
@@ -95,8 +93,6 @@ export default function DashboardPage() {
         const manualOverride = commands.override;
         
         setCurrentPhase(state.current_phase);
-        setLight1Timer(state.light1.timer_s);
-        setLight2Timer(state.light2.timer_s);
         setMode(state.mode);
         setIsPeakHourActive(state.peak_active);
         setIsManualOverride(manualOverride);
@@ -109,26 +105,39 @@ export default function DashboardPage() {
             setLight2Status(state.light2.status.toLowerCase());
         }
 
+        // Determine timer based on phase
+        const phaseState = getPhaseState(state.current_phase);
+        if (phaseState === 'green') {
+            const isR1 = state.current_phase.includes('R1');
+            const activeLightTimer = isR1 ? state.light1.timer_s : state.light2.timer_s;
+            const greenTime = state.peak_active ? dbTimingConfig.peak_green : (state.rain_active ? dbTimingConfig.rain_green : dbTimingConfig.normal_green);
+            setTimer(greenTime - (activeLightTimer || 0));
+        } else if (phaseState === 'amber') {
+            const isR1 = state.current_phase.includes('R1');
+            const activeLightTimer = isR1 ? state.light1.timer_s : state.light2.timer_s;
+            setTimer(dbTimingConfig.amber - (activeLightTimer || 0));
+        } else {
+             const isR1 = state.current_phase.includes('R1');
+            const activeLightTimer = isR1 ? state.light1.timer_s : state.light2.timer_s;
+            setTimer(dbTimingConfig.red - (activeLightTimer || 0));
+        }
+
+
         // System Status & Sensors
-        setSystemStatus(prevStatus => ({
-          ...prevStatus,
+        setSystemStatus({
           rainDetected: data.sensors.rain.detected,
+          rainActive: data.state.rain_active,
           vehiclePresence1: data.sensors.ir1.present,
           vehiclePresence2: data.sensors.ir2.present,
-        }));
+          systemOnline: data.system.online,
+        });
         
         // SMS Alerts
         setSmsConfig(data.alerts.gsm);
-
-        // Heartbeat
-        if(data.system.heartbeat_ms) {
-            lastHeartbeatRef.current = Date.now();
-            setSystemStatus(prev => ({...prev, systemOnline: true}));
-        }
       }
     }, (error) => {
       console.error(error);
-      setSystemStatus(prev => ({...prev, systemOnline: false}));
+      setSystemStatus(prev => ({...prev, systemOnline: false, rainActive: false}));
       toast({
         variant: "destructive",
         title: "Database Error",
@@ -136,16 +145,7 @@ export default function DashboardPage() {
       });
     });
 
-    const interval = setInterval(() => {
-        if (Date.now() - lastHeartbeatRef.current > 5000) {
-            setSystemStatus(prev => ({...prev, systemOnline: false}));
-        }
-    }, 2000);
-
-    return () => {
-      unsubscribe();
-      clearInterval(interval);
-    }
+    return () => unsubscribe();
   }, [toast]);
 
 
@@ -153,8 +153,9 @@ export default function DashboardPage() {
     const updates = {
       'traffic/config/delays_s/normal_green': newConfig.normalGreenTime,
       'traffic/config/delays_s/rain_green': newConfig.rainGreenTime,
-      'traffic/config/delays_s/all_red': newConfig.allRedTime,
-      'traffic/config/delays_s/min_green': newConfig.minGreenTime,
+      'traffic/config/delays_s/peak_green': newConfig.peakGreenTime,
+      'traffic/config/delays_s/red': newConfig.red,
+      'traffic/config/delays_s/amber': newConfig.amber,
     };
     update(ref(database), updates)
       .then(() => {
@@ -230,36 +231,28 @@ export default function DashboardPage() {
     set(ref(database, 'traffic/alerts/gsm/enabled'), isEnabled);
   }
 
-  const getPhaseState = () => {
-    if (currentPhase.includes('YELLOW')) return 'yellow';
-    if (currentPhase.includes('GREEN')) return 'green';
+  const getPhaseState = (phase: string) => {
+    if (phase.includes('AMBER')) return 'amber';
+    if (phase.includes('GREEN')) return 'green';
     return 'red';
   }
   
-  const getTimerForPhase = () => {
-    if (currentPhase.includes('R1')) return light1Timer;
-    if (currentPhase.includes('R2')) return light2Timer;
-    if (currentPhase === 'ALL_RED') return timingConfig.allRedTime;
-    return 0;
-  }
-  
   const getProgress = () => {
-    const phaseState = getPhaseState();
-    const timer = getTimerForPhase();
-
+    const phaseState = getPhaseState(currentPhase);
+    
     let maxTime = timingConfig.normalGreenTime;
     if(phaseState === 'green'){
-      maxTime = isPeakHourActive ? timingConfig.rainGreenTime : timingConfig.normalGreenTime
-    } else if (phaseState === 'yellow'){
-      maxTime = timingConfig.yellowTime
+      maxTime = isPeakHourActive ? timingConfig.peakGreenTime : (systemStatus.rainActive ? timingConfig.rainGreenTime : timingConfig.normalGreenTime);
+    } else if (phaseState === 'amber'){
+      maxTime = timingConfig.amber
     } else {
-      maxTime = timingConfig.allRedTime;
+      maxTime = timingConfig.red;
     }
     
     if (maxTime === 0) return 0;
-    return (timer / maxTime) * 100;
+    const progressValue = (timer / maxTime) * 100;
+    return 100 - progressValue;
   }
-
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -277,7 +270,7 @@ export default function DashboardPage() {
             <TrafficControlCard
               nsColor={light1Status}
               ewColor={light2Status}
-              timer={getTimerForPhase()}
+              timer={timer}
               progress={getProgress()}
               isManualOverride={isManualOverride}
               setManualOverride={handleSetManualOverride}
@@ -292,7 +285,7 @@ export default function DashboardPage() {
            <SystemStatusCard 
              status={systemStatus}
              currentPhase={currentPhase}
-             phaseState={getPhaseState()}
+             phaseState={getPhaseState(currentPhase) as "green" | "red" | "amber"}
              isManualOverride={isManualOverride}
            />
         </div>

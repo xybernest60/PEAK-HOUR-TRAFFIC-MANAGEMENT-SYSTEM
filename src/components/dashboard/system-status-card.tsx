@@ -6,6 +6,7 @@ import {
   CloudRain,
   ToggleLeft,
   Waypoints,
+  Zap,
 } from "lucide-react";
 import StatusCard from "./status-card";
 
@@ -13,12 +14,13 @@ import StatusCard from "./status-card";
 interface SystemStatusCardProps {
   status: {
     rainDetected: boolean;
+    rainActive: boolean;
     vehiclePresence1: boolean;
     vehiclePresence2: boolean;
     systemOnline: boolean;
   };
   currentPhase: string;
-  phaseState: "green" | "yellow" | "red";
+  phaseState: "green" | "yellow" | "red" | "amber";
   isManualOverride: boolean;
 }
 
@@ -29,14 +31,13 @@ export default function SystemStatusCard({
   isManualOverride,
 }: SystemStatusCardProps) {
   const getPhaseText = () => {
-    if (currentPhase === 'ALL_RED') return 'All Red';
     if (currentPhase.includes('R1')) {
        return `R. Mugabe Rd ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
     }
      if (currentPhase.includes('R2')) {
        return `S. Munjoma St ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
     }
-    return currentPhase;
+    return currentPhase.replace('_', ' ');
   };
 
   return (
@@ -48,15 +49,23 @@ export default function SystemStatusCard({
         <StatusCard
             icon={CloudRain}
             title="Rain Detection"
-            value={status.rainDetected ? "Active" : "Clear"}
+            value={status.rainDetected ? "Detected" : "Clear"}
             valueClass={status.rainDetected ? "text-cyan-400 after:bg-cyan-400/50" : "text-green-400"}
             hasGlow={status.rainDetected}
+        />
+        <StatusCard
+            icon={Zap}
+            title="Rain Mode"
+            value={status.rainActive ? "Active" : "Inactive"}
+            valueClass={status.rainActive ? "text-cyan-400 after:bg-cyan-400/50" : "text-muted-foreground"}
+            hasGlow={status.rainActive}
         />
          <StatusCard
           icon={ToggleLeft}
           title="Operation Mode"
           value={isManualOverride ? "Manual" : "Automatic"}
-          valueClass={isManualOverride ? "text-amber-400" : "text-green-400"}
+          valueClass={isManualOverride ? "text-amber-400 after:bg-amber-400/50" : "text-green-400"}
+          hasGlow={isManualOverride}
         />
         <StatusCard
             icon={Car}
