@@ -68,7 +68,7 @@ export default function LandingPage() {
                    Real-time monitoring and control of urban traffic flow.
                 </p>
                 <Button asChild className="mt-8" size="lg">
-                    <Link href="/login">Go to Dashboard</Link>
+                    <Link href="/dashboard">Continue to Dashboard</Link>
                 </Button>
             </div>
         </div>

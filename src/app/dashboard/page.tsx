@@ -5,19 +5,14 @@ import Header from "@/components/dashboard/header";
 import TrafficControlCard from "@/components/dashboard/traffic-control-card";
 import SystemStatusCard from "@/components/dashboard/system-status-card";
 import { useToast } from "@/hooks/use-toast";
-import { database, auth } from "@/lib/firebase";
+import { database } from "@/lib/firebase";
 import { ref, onValue, set } from "firebase/database";
 import ConfigurationSheet, { TimingConfiguration } from "@/components/dashboard/configuration-sheet";
-import { useRouter } from "next/navigation";
-import { useAuthState } from "react-firebase-hooks/auth";
 
 export type LightColor = "green" | "yellow" | "red" | "amber";
 
 export default function DashboardPage() {
   const { toast } = useToast();
-  const router = useRouter();
-  const [user, loading] = useAuthState(auth);
-  const [initialLoad, setInitialLoad] = React.useState(true);
 
   const [timingConfig, setTimingConfig] = React.useState<TimingConfiguration>({
     normalGreenTime: 5,
@@ -44,20 +39,6 @@ export default function DashboardPage() {
   const lastHeartbeat = React.useRef<number>(0);
 
   React.useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      router.push("/");
-      return;
-    }
-
-    if (initialLoad) {
-         toast({
-            title: `Welcome back, Nigel!`,
-            description: "You have been successfully signed in.",
-          });
-        setInitialLoad(false);
-    }
-
     const stateRef = ref(database, 'traffic/state');
     const systemRef = ref(database, 'traffic/system');
 
@@ -120,7 +101,7 @@ export default function DashboardPage() {
       unsubscribeSystem();
       clearInterval(interval);
     }
-  }, [user, loading, router, initialLoad]);
+  }, []);
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
     try {
@@ -205,17 +186,9 @@ export default function DashboardPage() {
     return 'red';
   }
 
-  if (loading || !user) {
-    return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
-            <div className="text-2xl">Loading Dashboard...</div>
-        </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header systemOnline={systemStatus.systemOnline} user={user}>
+      <Header systemOnline={systemStatus.systemOnline}>
          <ConfigurationSheet config={timingConfig} onSave={handleConfigSave} />
       </Header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
