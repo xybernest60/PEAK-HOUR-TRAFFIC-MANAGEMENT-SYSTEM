@@ -12,14 +12,16 @@ import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function LoginPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth);
+  const [signInWithEmailAndPassword, emailUser, loading, error] = useSignInWithEmailAndPassword(auth);
   const [signInWithGoogle, googleUser, googleLoading, googleError] = useSignInWithGoogle(auth);
   const { toast } = useToast();
   const router = useRouter();
+  const [user] = useAuthState(auth);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,14 +33,10 @@ export default function LoginPage() {
   };
 
   React.useEffect(() => {
-    if (user || googleUser) {
-      toast({
-        title: `Welcome back, Nigel!`,
-        description: "You have been successfully signed in.",
-      });
+    if (user) {
       router.push("/dashboard");
     }
-  }, [user, googleUser, router, toast]);
+  }, [user, router]);
 
   React.useEffect(() => {
     if (error) {

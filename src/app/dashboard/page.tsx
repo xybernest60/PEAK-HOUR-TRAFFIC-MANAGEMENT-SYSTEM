@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [user, loading] = useAuthState(auth);
+  const [initialLoad, setInitialLoad] = React.useState(true);
 
   const [timingConfig, setTimingConfig] = React.useState<TimingConfiguration>({
     normalGreenTime: 5,
@@ -47,6 +48,14 @@ export default function DashboardPage() {
     if (!user) {
       router.push("/");
       return;
+    }
+
+    if (initialLoad) {
+         toast({
+            title: `Welcome back, Nigel!`,
+            description: "You have been successfully signed in.",
+          });
+        setInitialLoad(false);
     }
 
     const stateRef = ref(database, 'traffic/state');
@@ -99,16 +108,11 @@ export default function DashboardPage() {
 
       setSystemStatus(prev => {
         if (prev.systemOnline !== isOnline) {
-          toast({
-            variant: isOnline ? "default" : "destructive",
-            title: isOnline ? "Controller Online" : "Controller Offline",
-            description: isOnline ? "Connection restored." : "No heartbeat received.",
-          });
           return { ...prev, systemOnline: isOnline };
         }
         return prev;
       });
-    }, 10000);
+    }, 5000);
 
 
     return () => {
@@ -116,7 +120,7 @@ export default function DashboardPage() {
       unsubscribeSystem();
       clearInterval(interval);
     }
-  }, [user, loading, router, toast]);
+  }, [user, loading, router, toast, initialLoad]);
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
     try {

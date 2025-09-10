@@ -6,26 +6,38 @@ import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+
 const FloatingIcon = ({ icon: Icon, className }: { icon: React.ElementType, className?: string }) => {
     const [animationClass, setAnimationClass] = React.useState("");
 
     React.useEffect(() => {
+        // This useEffect hook will only run on the client-side after hydration is complete.
+        // This prevents a mismatch between the server-rendered and client-rendered HTML.
         const animations = [
             "animate-[float_10s_ease-in-out_infinite]",
             "animate-[float_12s_ease-in-out_infinite_1s]",
             "animate-[float_15s_ease-in-out_infinite_2s]",
             "animate-[float_8s_ease-in-out_infinite_0.5s]",
         ];
-        // Ensure this only runs on the client
         setAnimationClass(animations[Math.floor(Math.random() * 4)]);
     }, []);
 
+    if (!animationClass) {
+        // Return a static version of the component on the server and during the initial client render.
+        return (
+            <div className={`absolute ${className}`}>
+                <Icon className={`relative text-primary/50`} />
+            </div>
+        );
+    }
+    
     return (
         <div className={`absolute ${className}`}>
             <Icon className={`relative text-primary/50 ${animationClass}`} />
         </div>
     );
 };
+
 
 export default function LandingPage() {
     return (
