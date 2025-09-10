@@ -10,23 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import Link from "next/link";
 
-export default function LoginDialog() {
+export default function LoginPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth);
   const [signInWithGoogle, googleUser, googleLoading, googleError] = useSignInWithGoogle(auth);
   const { toast } = useToast();
   const router = useRouter();
-  const [isOpen, setIsOpen] = React.useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +36,6 @@ export default function LoginDialog() {
         title: `Welcome back, Nigel!`,
         description: "You have been successfully signed in.",
       });
-      setIsOpen(false);
       router.push("/dashboard");
     }
   }, [user, googleUser, router, toast]);
@@ -66,23 +58,22 @@ export default function LoginDialog() {
   }, [error, googleError, toast]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="mt-8" size="lg">
-          Go to Dashboard
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex justify-center mb-4">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
+       <Link href="/" className="absolute top-4 left-4 flex items-center gap-2 text-foreground">
+          <TrafficPilotIcon className="h-6 w-6" />
+          <span className="font-semibold">Home</span>
+       </Link>
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+           <div className="flex justify-center mb-4">
             <TrafficPilotIcon className="h-12 w-12 text-primary" />
           </div>
-          <DialogTitle className="text-center">Welcome Back</DialogTitle>
-          <DialogDescription className="text-center">
+          <CardTitle>Welcome Back</CardTitle>
+          <CardDescription>
             Sign in to access the dashboard.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="px-6 pb-6">
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -117,8 +108,8 @@ export default function LoginDialog() {
           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={googleLoading}>
             {googleLoading ? "Redirecting..." : "Sign In with Google"}
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
