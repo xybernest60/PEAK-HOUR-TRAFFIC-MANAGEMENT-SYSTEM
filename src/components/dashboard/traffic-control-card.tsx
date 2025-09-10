@@ -45,13 +45,14 @@ interface TrafficControlCardProps {
   onManualOverrideChange: (isManual: boolean) => void;
   isPeakHour: boolean;
   onPeakHourChange: (isPeak: boolean) => void;
-  onManualLightChange: (lightId: 'light1' | 'light2', color: 'red' | 'green') => void;
+  onManualLightChange: (lightId: 'light1' | 'light2', color: 'red' | 'green' | 'yellow') => void;
 }
 
-const ManualLightControls = ({ lightId, isDisabled, onSet }: { lightId: 'light1' | 'light2', isDisabled: boolean, onSet: (color: 'red' | 'green') => void }) => {
+const ManualLightControls = ({ lightId, isDisabled, onSet }: { lightId: 'light1' | 'light2', isDisabled: boolean, onSet: (color: 'red' | 'green' | 'yellow') => void }) => {
     return (
         <div className={cn("flex justify-center gap-2 mt-4 transition-opacity", isDisabled && "opacity-50 pointer-events-none")}>
             <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" disabled={isDisabled} onClick={() => onSet('green')}>Green</Button>
+            <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white" disabled={isDisabled} onClick={() => onSet('yellow')}>Yellow</Button>
             <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" disabled={isDisabled} onClick={() => onSet('red')}>Red</Button>
         </div>
     )

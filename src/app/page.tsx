@@ -110,7 +110,7 @@ export default function DashboardPage() {
     }
   };
   
-  const handleManualLightChange = async (lightId: 'light1' | 'light2', color: Omit<LightColor, 'amber' | 'yellow'>) => {
+  const handleManualLightChange = async (lightId: 'light1' | 'light2', color: 'red' | 'green' | 'yellow') => {
     if (!isManualOverride) {
       toast({ title: "Enable manual override to change lights.", variant: "destructive" });
       return;
