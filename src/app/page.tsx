@@ -1,228 +1,60 @@
 "use client";
 
 import * as React from "react";
-import Header from "@/components/dashboard/header";
-import TrafficControlCard from "@/components/dashboard/traffic-control-card";
-import SystemStatusCard from "@/components/dashboard/system-status-card";
-import { useToast } from "@/hooks/use-toast";
-import { database } from "@/lib/firebase";
-import { ref, onValue, set } from "firebase/database";
-import ConfigurationSheet, { TimingConfiguration } from "@/components/dashboard/configuration-sheet";
+import { Car, TrafficCone, Road, TrafficLight as TrafficLightIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
 
-export type LightColor = "green" | "yellow" | "red" | "amber";
+const FloatingIcon = ({ icon: Icon, className }: { icon: React.ElementType, className?: string }) => {
+    const animationClass = [
+        "animate-[float_10s_ease-in-out_infinite]",
+        "animate-[float_12s_ease-in-out_infinite_1s]",
+        "animate-[float_15s_ease-in-out_infinite_2s]",
+        "animate-[float_8s_ease-in-out_infinite_0.5s]",
+    ][Math.floor(Math.random() * 4)];
 
-export default function DashboardPage() {
-  const { toast } = useToast();
-
-  const [timingConfig, setTimingConfig] = React.useState<TimingConfiguration>({
-    normalGreenTime: 5,
-    peakGreenTime: 10,
-    rainGreenTime: 7,
-    yellowTime: 2,
-    allRedTime: 1,
-  });
-
-  const [isManualOverride, setIsManualOverride] = React.useState(false);
-  const [isPeakHour, setIsPeakHour] = React.useState(false);
-
-  const [systemStatus, setSystemStatus] = React.useState({
-    rainDetected: false,
-    vehiclePresence1: false,
-    vehiclePresence2: false,
-    systemOnline: false,
-  });
-
-  const [currentPhase, setCurrentPhase] = React.useState("UNKNOWN");
-  const [light1Status, setLight1Status] = React.useState<LightColor>("red");
-  const [light2Status, setLight2Status] = React.useState<LightColor>("red");
-
-  const lastHeartbeat = React.useRef<number>(0);
-
-  React.useEffect(() => {
-    const stateRef = ref(database, 'traffic/state');
-    const systemRef = ref(database, 'traffic/system');
-
-    const unsubscribeState = onValue(stateRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        // State & Mode
-        setCurrentPhase(data.current_phase || "UNKNOWN");
-        setLight1Status((data.light1 || "RED").toLowerCase());
-        setLight2Status((data.light2 || "RED").toLowerCase());
-        setIsManualOverride(data.mode === "MANUAL");
-        setIsPeakHour(data.peak_active || false);
-
-        // System Status & Sensors from state
-        setSystemStatus(prev => ({
-          ...prev,
-          rainDetected: data.rain || false,
-          vehiclePresence1: data.ir1 || false,
-          vehiclePresence2: data.ir2 || false,
-        }));
-        
-        // Config from state
-        setTimingConfig({
-            normalGreenTime: data.normal_green_delay || 0,
-            peakGreenTime: data.peak_green_delay || 0,
-            rainGreenTime: data.rain_green_delay || 0,
-            yellowTime: data.yellow_delay || 0,
-            allRedTime: data.all_red_delay || 0,
-        });
-      }
-    }, (error) => {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Database Error",
-        description: "Could not connect to the real-time database.",
-      });
-    });
-
-    const unsubscribeSystem = onValue(systemRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.heartbeat_ms) {
-            lastHeartbeat.current = data.heartbeat_ms;
-        }
-    });
-
-    // Check for heartbeat every 10 seconds
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const timeSinceHeartbeat = now - lastHeartbeat.current;
-
-      const isOnline = lastHeartbeat.current > 0 && timeSinceHeartbeat < 15000; // 15 seconds threshold
-
-      setSystemStatus(prev => {
-        if (prev.systemOnline !== isOnline) {
-          toast({
-            variant: isOnline ? "default" : "destructive",
-            title: isOnline ? "Controller Online" : "Controller Offline",
-            description: isOnline ? "Connection restored." : "No heartbeat received.",
-          });
-          return { ...prev, systemOnline: isOnline };
-        }
-        return prev;
-      });
-    }, 10000);
-
-
-    return () => {
-      unsubscribeState();
-      unsubscribeSystem();
-      clearInterval(interval);
-    }
-  }, [toast]);
-
-  const handleConfigSave = async (newConfig: TimingConfiguration) => {
-    try {
-        await set(ref(database, 'traffic/state/normal_green_delay'), newConfig.normalGreenTime);
-        await set(ref(database, 'traffic/state/peak_green_delay'), newConfig.peakGreenTime);
-        await set(ref(database, 'traffic/state/rain_green_delay'), newConfig.rainGreenTime);
-        await set(ref(database, 'traffic/state/yellow_delay'), newConfig.yellowTime);
-        await set(ref(database, 'traffic/state/all_red_delay'), newConfig.allRedTime);
-        toast({
-            title: "Configuration Saved",
-            description: "Timing delays have been updated.",
-        });
-    } catch (error) {
-        console.error("Failed to save timing configuration:", error);
-        toast({
-            variant: "destructive",
-            title: "Save Failed",
-            description: "Could not save timing configuration.",
-        });
-    }
-  };
-
-  const handleManualOverrideToggle = async (isManual: boolean) => {
-    try {
-      await set(ref(database, 'traffic/state/mode'), isManual ? "MANUAL" : "AUTO");
-    } catch (error) {
-      console.error("Failed to toggle manual override:", error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Could not toggle manual override.",
-      });
-    }
-  };
-
-  const handlePeakHourToggle = async (isPeak: boolean) => {
-    try {
-      await set(ref(database, 'traffic/state/peak_active'), isPeak);
-    } catch (error) {
-        console.error("Failed to toggle peak hour:", error);
-        toast({
-            variant: "destructive",
-            title: "Update Failed",
-            description: "Could not toggle peak hour mode.",
-        });
-    }
-  };
-  
-  const handleManualLightChange = async (lightId: 'light1' | 'light2', color: Omit<LightColor, 'amber'>) => {
-     if (!isManualOverride) {
-        toast({
-            variant: "destructive",
-            title: "Action Disabled",
-            description: "Enable Manual Override to control lights.",
-        });
-        return;
-    }
-    const manualLightPath = lightId === 'light1' ? 'manualLight1' : 'manualLight2';
-    const lightPath = lightId === 'light1' ? 'light1' : 'light2';
-
-    try {
-      const upperCaseColor = color.toUpperCase();
-      await Promise.all([
-        set(ref(database, `traffic/state/${manualLightPath}`), upperCaseColor),
-        set(ref(database, `traffic/state/${lightPath}`), upperCaseColor)
-      ]);
-    } catch (error) {
-      console.error(`Failed to set ${lightId} to ${color}:`, error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: `Could not change ${lightId} state.`,
-      });
-    }
-  };
-
-
-  const getPhaseState = (phase: string) => {
-    if (!phase) return 'red';
-    if (phase.includes('AMBER') || phase.includes('YELLOW')) return 'amber';
-    if (phase.includes('GREEN')) return 'green';
-    return 'red';
-  }
-
-  return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header systemOnline={systemStatus.systemOnline}>
-         <ConfigurationSheet config={timingConfig} onSave={handleConfigSave} />
-      </Header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
-        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-          <TrafficControlCard
-            nsColor={light1Status}
-            ewColor={light2Status}
-            isManualOverride={isManualOverride}
-            onManualOverrideChange={handleManualOverrideToggle}
-            isPeakHour={isPeakHour}
-            onPeakHourChange={handlePeakHourToggle}
-            onManualLightChange={handleManualLightChange}
-          />
+    return (
+        <div className={`absolute ${className}`}>
+            <Icon className={`relative text-primary/50 ${animationClass}`} />
         </div>
-        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-1">
-          <SystemStatusCard
-            status={systemStatus}
-            currentPhase={currentPhase}
-            phaseState={getPhaseState(currentPhase)}
-            isManualOverride={isManualOverride}
-            isPeakHour={isPeakHour}
-          />
+    );
+};
+
+export default function LandingPage() {
+    return (
+        <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background">
+            <div className="absolute inset-0 z-0">
+                <FloatingIcon icon={Car} className="top-[10%] left-[15%] text-4xl" />
+                <FloatingIcon icon={TrafficLightIcon} className="top-[20%] right-[20%] text-5xl" />
+                <FloatingIcon icon={Road} className="bottom-[15%] left-[25%] text-6xl" />
+                <FloatingIcon icon={TrafficCone} className="bottom-[20%] right-[15%] text-4xl" />
+                <FloatingIcon icon={Car} className="top-[60%] left-[30%] text-5xl" />
+                <FloatingIcon icon={TrafficLightIcon} className="top-[70%] right-[40%] text-3xl" />
+            </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0% { transform: translateY(0px) rotate(0deg); }
+                    50% { transform: translateY(-20px) rotate(5deg); }
+                    100% { transform: translateY(0px) rotate(0deg); }
+                }
+            `}</style>
+            
+            <div className="z-10 flex flex-col items-center text-center backdrop-blur-sm p-8 rounded-lg">
+                 <TrafficPilotIcon className="h-24 w-24 text-primary mb-4" />
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-foreground">
+                    PEAK HOUR TRAFFIC MANAGEMENT SYSTEM
+                </h1>
+                <p className="mt-4 max-w-[700px] text-muted-foreground md:text-xl">
+                   Real-time monitoring and control of urban traffic flow.
+                </p>
+                <Link href="/dashboard" passHref>
+                    <Button className="mt-8" size="lg">
+                        Go to Dashboard
+                    </Button>
+                </Link>
+            </div>
         </div>
-      </main>
-    </div>
-  );
+    );
 }

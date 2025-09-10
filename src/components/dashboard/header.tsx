@@ -16,7 +16,7 @@ export default function Header({ systemOnline, children }: HeaderProps) {
       <div className="flex items-center gap-2">
         <TrafficPilotIcon className="h-6 w-6 text-primary" />
         <h1 className="text-lg font-semibold tracking-tighter sm:text-xl">
-          PEAK HOUR TRAFFIC MANAGEMENT SYSTEM
+          Dashboard
         </h1>
       </div>
       <div className="ml-auto flex items-center gap-4">
