@@ -28,11 +28,12 @@ const Light = ({ color, active }: { color: string; active: boolean }) => {
 };
 
 const TrafficLight = ({ activeColor }: { activeColor: LightColor }) => {
+  const safeActiveColor = activeColor?.toLowerCase() || 'red';
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg bg-background/50 dark:bg-background p-2 border">
-      <Light color="#ef4444" active={activeColor === "red"} />
-      <Light color="#f59e0b" active={activeColor === "amber" || activeColor === "yellow"} />
-      <Light color="#22c55e" active={activeColor === "green"} />
+      <Light color="#ef4444" active={safeActiveColor === "red"} />
+      <Light color="#f59e0b" active={safeActiveColor === "amber" || safeActiveColor === "yellow"} />
+      <Light color="#22c55e" active={safeActiveColor === "green"} />
     </div>
   );
 };
@@ -44,14 +45,13 @@ interface TrafficControlCardProps {
   onManualOverrideChange: (isManual: boolean) => void;
   isPeakHour: boolean;
   onPeakHourChange: (isPeak: boolean) => void;
-  onManualLightChange: (lightId: 'light1' | 'light2', color: 'red' | 'yellow' | 'green') => void;
+  onManualLightChange: (lightId: 'light1' | 'light2', color: 'red' | 'green') => void;
 }
 
-const ManualLightControls = ({ lightId, isDisabled, onSet }: { lightId: 'light1' | 'light2', isDisabled: boolean, onSet: (color: 'red' | 'yellow' | 'green') => void }) => {
+const ManualLightControls = ({ lightId, isDisabled, onSet }: { lightId: 'light1' | 'light2', isDisabled: boolean, onSet: (color: 'red' | 'green') => void }) => {
     return (
-        <div className={cn("flex justify-center gap-2 mt-4 transition-opacity", isDisabled && "opacity-50")}>
+        <div className={cn("flex justify-center gap-2 mt-4 transition-opacity", isDisabled && "opacity-50 pointer-events-none")}>
             <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" disabled={isDisabled} onClick={() => onSet('green')}>Green</Button>
-            <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white" disabled={isDisabled} onClick={() => onSet('yellow')}>Yellow</Button>
             <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" disabled={isDisabled} onClick={() => onSet('red')}>Red</Button>
         </div>
     )

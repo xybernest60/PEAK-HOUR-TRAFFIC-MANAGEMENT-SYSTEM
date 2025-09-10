@@ -30,14 +30,16 @@ export default function SystemStatusCard({
   isManualOverride,
   isPeakHour
 }: SystemStatusCardProps) {
+  
   const getPhaseText = () => {
-    if (currentPhase.includes('R1')) {
+    const phaseUpper = currentPhase.toUpperCase();
+    if (phaseUpper.includes('R1')) {
        return `R. Mugabe Rd ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
     }
-     if (currentPhase.includes('R2')) {
+     if (phaseUpper.includes('R2')) {
        return `S. Munjoma St ${phaseState.charAt(0).toUpperCase() + phaseState.slice(1)}`
     }
-    return currentPhase.replace('_', ' ');
+    return phaseUpper.replace('_', ' ');
   };
 
   return (

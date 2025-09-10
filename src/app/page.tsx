@@ -24,23 +24,65 @@ export default function DashboardPage() {
 
   const [isManualOverride, setIsManualOverride] = React.useState(false);
   const [isPeakHour, setIsPeakHour] = React.useState(false);
+  const [systemOnline, setSystemOnline] = React.useState(false);
 
   const [systemStatus, setSystemStatus] = React.useState({
     rainDetected: false,
     vehiclePresence1: false,
     vehiclePresence2: false,
-    systemOnline: false,
   });
 
   const [currentPhase, setCurrentPhase] = React.useState("UNKNOWN");
   const [light1Status, setLight1Status] = React.useState<LightColor>("red");
   const [light2Status, setLight2Status] = React.useState<LightColor>("red");
 
-  const lastHeartbeat = React.useRef<number>(0);
+  // Subscribe to all state changes from Firebase
+  React.useEffect(() => {
+    const stateRef = ref(database, 'traffic/state');
+    
+    const unsubscribe = onValue(stateRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setSystemOnline(true);
+        setIsManualOverride(data.mode === 'manual');
+        setIsPeakHour(data.peak_active === true);
+        setCurrentPhase(data.current_phase || "UNKNOWN");
+        setLight1Status(data.light1 || "red");
+        setLight2Status(data.light2 || "red");
+        setSystemStatus({
+          rainDetected: data.rain === true,
+          vehiclePresence1: data.ir1 === true,
+          vehiclePresence2: data.ir2 === true,
+        });
+        setTimingConfig({
+            normalGreenTime: data.normal_green_delay || 5,
+            peakGreenTime: data.peak_green_delay || 10,
+            rainGreenTime: data.rain_green_delay || 7,
+            yellowTime: data.yellow_delay || 2,
+            allRedTime: data.all_red_delay || 1,
+        });
+      } else {
+        setSystemOnline(false);
+      }
+    }, (error) => {
+        console.error("Firebase read failed:", error);
+        setSystemOnline(false);
+        toast({ title: "Failed to connect to system", description: "Could not read real-time data from Firebase.", variant: "destructive" });
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
+
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
     try {
-      await set(ref(database, 'config'), newConfig);
+      await Promise.all([
+          set(ref(database, 'traffic/state/normal_green_delay'), newConfig.normalGreenTime),
+          set(ref(database, 'traffic/state/peak_green_delay'), newConfig.peakGreenTime),
+          set(ref(database, 'traffic/state/rain_green_delay'), newConfig.rainGreenTime),
+          set(ref(database, 'traffic/state/yellow_delay'), newConfig.yellowTime),
+          set(ref(database, 'traffic/state/all_red_delay'), newConfig.allRedTime),
+      ]);
       toast({ title: "Configuration saved successfully!" });
     } catch (error) {
       console.error("Failed to save configuration:", error);
@@ -50,8 +92,7 @@ export default function DashboardPage() {
 
   const handleManualOverrideToggle = async (isManual: boolean) => {
     try {
-      await set(ref(database, 'state/manualOverride'), isManual);
-      setIsManualOverride(isManual);
+      await set(ref(database, 'traffic/state/mode'), isManual ? 'manual' : 'auto');
       toast({ title: `Manual override ${isManual ? 'enabled' : 'disabled'}.` });
     } catch (error) {
        console.error("Failed to set manual override:", error);
@@ -61,8 +102,7 @@ export default function DashboardPage() {
 
   const handlePeakHourToggle = async (isPeak: boolean) => {
     try {
-      await set(ref(database, 'state/peakHour'), isPeak);
-      setIsPeakHour(isPeak);
+      await set(ref(database, 'traffic/state/peak_active'), isPeak);
       toast({ title: `Peak hour ${isPeak ? 'activated' : 'deactivated'}.` });
     } catch (error) {
        console.error("Failed to set peak hour:", error);
@@ -75,8 +115,11 @@ export default function DashboardPage() {
       toast({ title: "Enable manual override to change lights.", variant: "destructive" });
       return;
     }
+    
+    const path = lightId === 'light1' ? 'traffic/state/manualLight1' : 'traffic/state/manualLight2';
+
     try {
-      await set(ref(database, `state/manualControl/${lightId}`), color);
+      await set(ref(database, path), color);
       toast({ title: `Set ${lightId} to ${color}` });
     } catch (error) {
       console.error("Failed to manually change light:", error);
@@ -94,7 +137,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header systemOnline={systemStatus.systemOnline}>
+      <Header systemOnline={systemOnline}>
          <ConfigurationSheet config={timingConfig} onSave={handleConfigSave} />
       </Header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
