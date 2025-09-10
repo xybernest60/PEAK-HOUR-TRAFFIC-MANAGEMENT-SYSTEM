@@ -32,7 +32,7 @@ export default function DashboardPage() {
     systemOnline: false,
   });
 
-  const [currentPhase, setCurrentPhase] = React.useState("R1_GREEN");
+  const [currentPhase, setCurrentPhase] = React.useState("UNKNOWN");
   const [light1Status, setLight1Status] = React.useState<LightColor>("red");
   const [light2Status, setLight2Status] = React.useState<LightColor>("red");
 
@@ -52,7 +52,7 @@ export default function DashboardPage() {
         setIsManualOverride(data.mode === "MANUAL");
         setIsPeakHour(data.peak_active || false);
 
-        // System Status & Sensors
+        // System Status & Sensors from state
         setSystemStatus(prev => ({
           ...prev,
           rainDetected: data.rain || false,
@@ -90,7 +90,7 @@ export default function DashboardPage() {
       const now = Date.now();
       const timeSinceHeartbeat = now - lastHeartbeat.current;
 
-      const isOnline = timeSinceHeartbeat < 15000; // 15 seconds threshold
+      const isOnline = lastHeartbeat.current > 0 && timeSinceHeartbeat < 15000; // 15 seconds threshold
 
       setSystemStatus(prev => {
         if (prev.systemOnline !== isOnline) {
