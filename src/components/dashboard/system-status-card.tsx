@@ -6,7 +6,6 @@ import {
   CloudRain,
   ToggleLeft,
   Waypoints,
-  Zap,
 } from "lucide-react";
 import StatusCard from "./status-card";
 
@@ -14,10 +13,8 @@ import StatusCard from "./status-card";
 interface SystemStatusCardProps {
   status: {
     rainDetected: boolean;
-    rainActive: boolean;
     vehiclePresence1: boolean;
     vehiclePresence2: boolean;
-    systemOnline: boolean;
   };
   currentPhase: string;
   phaseState: "green" | "yellow" | "red" | "amber";
@@ -52,13 +49,6 @@ export default function SystemStatusCard({
             value={status.rainDetected ? "Detected" : "Clear"}
             valueClass={status.rainDetected ? "text-cyan-400 after:bg-cyan-400/50" : "text-green-400"}
             hasGlow={status.rainDetected}
-        />
-        <StatusCard
-            icon={Zap}
-            title="Rain Mode"
-            value={status.rainActive ? "Active" : "Inactive"}
-            valueClass={status.rainActive ? "text-cyan-400 after:bg-cyan-400/50" : "text-muted-foreground"}
-            hasGlow={status.rainActive}
         />
          <StatusCard
           icon={ToggleLeft}
