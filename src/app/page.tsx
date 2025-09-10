@@ -159,6 +159,27 @@ export default function DashboardPage() {
       });
     }
   };
+  
+  const handleManualLightChange = async (lightId: 'light1' | 'light2', color: Omit<LightColor, 'amber'>) => {
+     if (!isManualOverride) {
+        toast({
+            variant: "destructive",
+            title: "Action Disabled",
+            description: "Enable Manual Override to control lights.",
+        });
+        return;
+    }
+    try {
+      await set(ref(database, `traffic/state/${lightId}`), color.toUpperCase());
+    } catch (error) {
+      console.error(`Failed to set ${lightId} to ${color}:`, error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: `Could not change ${lightId} state.`,
+      });
+    }
+  };
 
 
   const getPhaseState = (phase: string) => {
@@ -182,6 +203,7 @@ export default function DashboardPage() {
             onManualOverrideChange={handleManualOverrideToggle}
             isPeakHour={isPeakHour}
             onPeakHourChange={handlePeakHourToggle}
+            onManualLightChange={handleManualLightChange}
           />
         </div>
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-1">

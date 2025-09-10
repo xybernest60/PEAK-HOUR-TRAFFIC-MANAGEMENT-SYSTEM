@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import * as React from "react";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
+import { Button } from "../ui/button";
 
 const Light = ({ color, active }: { color: string; active: boolean }) => {
   return (
@@ -43,6 +44,17 @@ interface TrafficControlCardProps {
   onManualOverrideChange: (isManual: boolean) => void;
   isPeakHour: boolean;
   onPeakHourChange: (isPeak: boolean) => void;
+  onManualLightChange: (lightId: 'light1' | 'light2', color: 'red' | 'yellow' | 'green') => void;
+}
+
+const ManualLightControls = ({ lightId, isDisabled, onSet }: { lightId: 'light1' | 'light2', isDisabled: boolean, onSet: (color: 'red' | 'yellow' | 'green') => void }) => {
+    return (
+        <div className={cn("flex justify-center gap-2 mt-4 transition-opacity", isDisabled && "opacity-50")}>
+            <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" disabled={isDisabled} onClick={() => onSet('green')}>Green</Button>
+            <Button size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white" disabled={isDisabled} onClick={() => onSet('yellow')}>Yellow</Button>
+            <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" disabled={isDisabled} onClick={() => onSet('red')}>Red</Button>
+        </div>
+    )
 }
 
 export default function TrafficControlCard({
@@ -52,6 +64,7 @@ export default function TrafficControlCard({
   onManualOverrideChange,
   isPeakHour,
   onPeakHourChange,
+  onManualLightChange,
 }: TrafficControlCardProps) {
 
   return (
@@ -89,10 +102,20 @@ export default function TrafficControlCard({
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Robert Mugabe Rd</h3>
             <TrafficLight activeColor={nsColor} />
+            <ManualLightControls 
+                lightId="light1" 
+                isDisabled={!isManualOverride} 
+                onSet={(color) => onManualLightChange('light1', color)} 
+            />
           </div>
           <div className="flex flex-col items-center gap-4">
             <h3 className="font-semibold text-lg">Sam Munjoma St</h3>
             <TrafficLight activeColor={ewColor} />
+            <ManualLightControls 
+                lightId="light2" 
+                isDisabled={!isManualOverride} 
+                onSet={(color) => onManualLightChange('light2', color)} 
+            />
           </div>
         </div>
       </CardContent>
