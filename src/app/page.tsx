@@ -44,7 +44,7 @@ export default function DashboardPage() {
       const data = snapshot.val();
       if (data) {
         setSystemOnline(true);
-        setIsManualOverride(data.mode === 'manual');
+        setIsManualOverride(data.mode === 'MANUAL');
         setIsPeakHour(data.peak_active === true);
         setCurrentPhase(data.current_phase || "UNKNOWN");
         setLight1Status(data.light1 || "red");
@@ -92,7 +92,7 @@ export default function DashboardPage() {
 
   const handleManualOverrideToggle = async (isManual: boolean) => {
     try {
-      await set(ref(database, 'traffic/state/mode'), isManual ? 'manual' : 'auto');
+      await set(ref(database, 'traffic/state/mode'), isManual ? 'MANUAL' : 'AUTO');
       toast({ title: `Manual override ${isManual ? 'enabled' : 'disabled'}.` });
     } catch (error) {
        console.error("Failed to set manual override:", error);
