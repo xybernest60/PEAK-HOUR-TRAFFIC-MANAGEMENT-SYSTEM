@@ -43,10 +43,9 @@ export default function LoginDialog() {
       toast({
         title: `Welcome back, Nigel!`,
         description: "You have been successfully signed in.",
-        action: <ToastAction altText="Go to Dashboard" onClick={() => router.push('/dashboard')}>Go to Dashboard</ToastAction>
       });
       setIsOpen(false);
-       router.push("/dashboard");
+      router.push("/dashboard");
     }
   }, [user, googleUser, router, toast]);
 
