@@ -120,7 +120,7 @@ export default function DashboardPage() {
       unsubscribeSystem();
       clearInterval(interval);
     }
-  }, [user, loading, router, toast, initialLoad]);
+  }, [user, loading, router, initialLoad]);
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
     try {
