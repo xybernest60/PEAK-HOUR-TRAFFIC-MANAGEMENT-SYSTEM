@@ -39,8 +39,8 @@ export default function DashboardPage() {
   const lastHeartbeat = React.useRef<number>(0);
 
   React.useEffect(() => {
-    const stateRef = ref(database, 'state');
-    const systemRef = ref(database, 'system');
+    const stateRef = ref(database, 'traffic/state');
+    const systemRef = ref(database, 'traffic/system');
 
     const unsubscribeState = onValue(stateRef, (snapshot) => {
       const data = snapshot.val();
@@ -115,11 +115,11 @@ export default function DashboardPage() {
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
     try {
-        await set(ref(database, 'state/normal_green_delay'), newConfig.normalGreenTime);
-        await set(ref(database, 'state/peak_green_delay'), newConfig.peakGreenTime);
-        await set(ref(database, 'state/rain_green_delay'), newConfig.rainGreenTime);
-        await set(ref(database, 'state/yellow_delay'), newConfig.yellowTime);
-        await set(ref(database, 'state/all_red_delay'), newConfig.allRedTime);
+        await set(ref(database, 'traffic/state/normal_green_delay'), newConfig.normalGreenTime);
+        await set(ref(database, 'traffic/state/peak_green_delay'), newConfig.peakGreenTime);
+        await set(ref(database, 'traffic/state/rain_green_delay'), newConfig.rainGreenTime);
+        await set(ref(database, 'traffic/state/yellow_delay'), newConfig.yellowTime);
+        await set(ref(database, 'traffic/state/all_red_delay'), newConfig.allRedTime);
         toast({
             title: "Configuration Saved",
             description: "Timing delays have been updated.",
@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   const handleManualOverrideToggle = async (isManual: boolean) => {
     try {
-      await set(ref(database, 'state/mode'), isManual ? "MANUAL" : "AUTO");
+      await set(ref(database, 'traffic/state/mode'), isManual ? "MANUAL" : "AUTO");
     } catch (error) {
       console.error("Failed to toggle manual override:", error);
       toast({
@@ -149,7 +149,7 @@ export default function DashboardPage() {
 
   const handlePeakHourToggle = async (isPeak: boolean) => {
     try {
-      await set(ref(database, 'state/peak_active'), isPeak);
+      await set(ref(database, 'traffic/state/peak_active'), isPeak);
     } catch (error) {
       console.error("Failed to toggle peak hour:", error);
       toast({
