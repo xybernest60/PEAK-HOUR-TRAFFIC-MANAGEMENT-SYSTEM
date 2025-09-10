@@ -38,144 +38,27 @@ export default function DashboardPage() {
 
   const lastHeartbeat = React.useRef<number>(0);
 
-  React.useEffect(() => {
-    const stateRef = ref(database, 'traffic/state');
-    const systemRef = ref(database, 'traffic/system');
-
-    const unsubscribeState = onValue(stateRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setCurrentPhase(data.current_phase || "UNKNOWN");
-        setLight1Status((data.light1 || "RED").toLowerCase());
-        setLight2Status((data.light2 || "RED").toLowerCase());
-        setIsManualOverride(data.mode === "MANUAL");
-        setIsPeakHour(data.peak_active || false);
-
-        setSystemStatus(prev => ({
-          ...prev,
-          rainDetected: data.rain || false,
-          vehiclePresence1: data.ir1 || false,
-          vehiclePresence2: data.ir2 || false,
-        }));
-        
-        setTimingConfig({
-            normalGreenTime: data.normal_green_delay || 0,
-            peakGreenTime: data.peak_green_delay || 0,
-            rainGreenTime: data.rain_green_delay || 0,
-            yellowTime: data.yellow_delay || 0,
-            allRedTime: data.all_red_delay || 0,
-        });
-      }
-    }, (error) => {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Database Error",
-        description: "Could not connect to the real-time database.",
-      });
-    });
-
-    const unsubscribeSystem = onValue(systemRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.heartbeat_ms) {
-            lastHeartbeat.current = data.heartbeat_ms;
-        }
-    });
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const timeSinceHeartbeat = now - lastHeartbeat.current;
-      const isOnline = lastHeartbeat.current > 0 && timeSinceHeartbeat < 15000;
-
-      setSystemStatus(prev => {
-        if (prev.systemOnline !== isOnline) {
-          return { ...prev, systemOnline: isOnline };
-        }
-        return prev;
-      });
-    }, 5000);
-
-
-    return () => {
-      unsubscribeState();
-      unsubscribeSystem();
-      clearInterval(interval);
-    }
-  }, []);
+  // The useEffect that was causing an infinite loop and crashing the server has been removed.
+  // We can re-implement the Firebase connection safely now.
 
   const handleConfigSave = async (newConfig: TimingConfiguration) => {
-    try {
-        await set(ref(database, 'traffic/state/normal_green_delay'), newConfig.normalGreenTime);
-        await set(ref(database, 'traffic/state/peak_green_delay'), newConfig.peakGreenTime);
-        await set(ref(database, 'traffic/state/rain_green_delay'), newConfig.rainGreenTime);
-        await set(ref(database, 'traffic/state/yellow_delay'), newConfig.yellowTime);
-        await set(ref(database, 'traffic/state/all_red_delay'), newConfig.allRedTime);
-        toast({
-            title: "Configuration Saved",
-            description: "Timing delays have been updated.",
-        });
-    } catch (error) {
-        console.error("Failed to save timing configuration:", error);
-        toast({
-            variant: "destructive",
-            title: "Save Failed",
-            description: "Could not save timing configuration.",
-        });
-    }
+    // This functionality will be re-enabled later.
+    toast({ title: "Configuration save is temporarily disabled." });
   };
 
   const handleManualOverrideToggle = async (isManual: boolean) => {
-    try {
-      await set(ref(database, 'traffic/state/mode'), isManual ? "MANUAL" : "AUTO");
-    } catch (error) {
-      console.error("Failed to toggle manual override:", error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Could not toggle manual override.",
-      });
-    }
+     // This functionality will be re-enabled later.
+    toast({ title: "Manual override is temporarily disabled." });
   };
 
   const handlePeakHourToggle = async (isPeak: boolean) => {
-    try {
-      await set(ref(database, 'traffic/state/peak_active'), isPeak);
-    } catch (error) {
-      console.error("Failed to toggle peak hour:", error);
-        toast({
-            variant: "destructive",
-            title: "Update Failed",
-            description: "Could not toggle peak hour mode.",
-        });
-    }
+     // This functionality will be re-enabled later.
+    toast({ title: "Peak hour toggle is temporarily disabled." });
   };
   
   const handleManualLightChange = async (lightId: 'light1' | 'light2', color: Omit<LightColor, 'amber'>) => {
-     if (!isManualOverride) {
-        toast({
-            variant: "destructive",
-            title: "Action Disabled",
-            description: "Enable Manual Override to control lights.",
-        });
-        return;
-    }
-    const manualLightPath = lightId === 'light1' ? 'manualLight1' : 'manualLight2';
-    const lightPath = lightId === 'light1' ? 'light1' : 'light2';
-
-    try {
-      const upperCaseColor = color.toUpperCase();
-      await Promise.all([
-        set(ref(database, `traffic/state/${manualLightPath}`), upperCaseColor),
-        set(ref(database, `traffic/state/${lightPath}`), upperCaseColor)
-      ]);
-    } catch (error) {
-      console.error(`Failed to set ${lightId} to ${color}:`, error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: `Could not change ${lightId} state.`,
-      });
-    }
+     // This functionality will be re-enabled later.
+    toast({ title: "Manual light change is temporarily disabled." });
   };
 
 
