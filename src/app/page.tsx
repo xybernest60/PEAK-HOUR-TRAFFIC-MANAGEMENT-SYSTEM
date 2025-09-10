@@ -7,12 +7,17 @@ import Link from "next/link";
 import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
 
 const FloatingIcon = ({ icon: Icon, className }: { icon: React.ElementType, className?: string }) => {
-    const animationClass = [
-        "animate-[float_10s_ease-in-out_infinite]",
-        "animate-[float_12s_ease-in-out_infinite_1s]",
-        "animate-[float_15s_ease-in-out_infinite_2s]",
-        "animate-[float_8s_ease-in-out_infinite_0.5s]",
-    ][Math.floor(Math.random() * 4)];
+    const [animationClass, setAnimationClass] = React.useState("");
+
+    React.useEffect(() => {
+        const animations = [
+            "animate-[float_10s_ease-in-out_infinite]",
+            "animate-[float_12s_ease-in-out_infinite_1s]",
+            "animate-[float_15s_ease-in-out_infinite_2s]",
+            "animate-[float_8s_ease-in-out_infinite_0.5s]",
+        ];
+        setAnimationClass(animations[Math.floor(Math.random() * 4)]);
+    }, []);
 
     return (
         <div className={`absolute ${className}`}>
