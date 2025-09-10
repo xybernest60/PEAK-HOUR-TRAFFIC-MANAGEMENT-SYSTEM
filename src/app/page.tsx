@@ -7,21 +7,24 @@ import SystemStatusCard from "@/components/dashboard/system-status-card";
 import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/firebase";
 import { ref, onValue, set } from "firebase/database";
-import ConfigurationSheet, { TimingConfiguration } from "@/components/dashboard/configuration-sheet";
+import ConfigurationSheet, { PeakHourConfig, TimingConfig } from "@/components/dashboard/configuration-sheet";
 
 export type LightColor = "green" | "yellow" | "red" | "amber";
 
 export default function DashboardPage() {
   const { toast } = useToast();
 
-  const [timingConfig, setTimingConfig] = React.useState<TimingConfiguration>({
+  const [timingConfig, setTimingConfig] = React.useState<TimingConfig>({
     normalGreenTime: 5,
     peakGreenTime: 10,
     rainGreenTime: 7,
     yellowTime: 2,
     allRedTime: 1,
-    peakStartTime: "00:00",
-    peakEndTime: "00:00",
+  });
+
+  const [peakHourConfig, setPeakHourConfig] = React.useState<PeakHourConfig>({
+      peakStartTime: "00:00",
+      peakEndTime: "00:00",
   });
 
   const [isManualOverride, setIsManualOverride] = React.useState(false);
@@ -62,9 +65,11 @@ export default function DashboardPage() {
             rainGreenTime: data.rain_green_delay || 7,
             yellowTime: data.yellow_delay || 2,
             allRedTime: data.all_red_delay || 1,
+        });
+        setPeakHourConfig({
             peakStartTime: data.peak_start_time || "00:00",
             peakEndTime: data.peak_end_time || "00:00",
-        });
+        })
       } else {
         setSystemOnline(false);
       }
@@ -82,7 +87,7 @@ export default function DashboardPage() {
     if (isManualOverride) return;
 
     const checkPeakTime = () => {
-      const { peakStartTime, peakEndTime } = timingConfig;
+      const { peakStartTime, peakEndTime } = peakHourConfig;
       if (!peakStartTime || !peakEndTime || peakStartTime === peakEndTime) {
         return; 
       }
@@ -107,10 +112,10 @@ export default function DashboardPage() {
     checkPeakTime();
 
     return () => clearInterval(intervalId);
-  }, [timingConfig, isPeakHour, isManualOverride]);
+  }, [peakHourConfig, isPeakHour, isManualOverride]);
 
 
-  const handleConfigSave = async (newConfig: TimingConfiguration) => {
+  const handleTimingConfigSave = async (newConfig: TimingConfig) => {
     try {
       await Promise.all([
           set(ref(database, 'traffic/state/normal_green_delay'), newConfig.normalGreenTime),
@@ -118,15 +123,27 @@ export default function DashboardPage() {
           set(ref(database, 'traffic/state/rain_green_delay'), newConfig.rainGreenTime),
           set(ref(database, 'traffic/state/yellow_delay'), newConfig.yellowTime),
           set(ref(database, 'traffic/state/all_red_delay'), newConfig.allRedTime),
+      ]);
+      toast({ title: "Timing configuration saved!" });
+    } catch (error) {
+      console.error("Failed to save timing configuration:", error);
+      toast({ title: "Error saving timing configuration", variant: "destructive" });
+    }
+  };
+  
+  const handlePeakHourConfigSave = async (newConfig: PeakHourConfig) => {
+    try {
+      await Promise.all([
           set(ref(database, 'traffic/state/peak_start_time'), newConfig.peakStartTime),
           set(ref(database, 'traffic/state/peak_end_time'), newConfig.peakEndTime),
       ]);
-      toast({ title: "Configuration saved successfully!" });
+      toast({ title: "Peak hour schedule saved!" });
     } catch (error) {
-      console.error("Failed to save configuration:", error);
-      toast({ title: "Error saving configuration", variant: "destructive" });
+      console.error("Failed to save peak hour configuration:", error);
+      toast({ title: "Error saving peak hour schedule", variant: "destructive" });
     }
   };
+
 
   const handleManualOverrideToggle = async (isManual: boolean) => {
     try {
@@ -169,7 +186,12 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <Header systemOnline={systemOnline}>
-         <ConfigurationSheet config={timingConfig} onSave={handleConfigSave} />
+         <ConfigurationSheet 
+            timingConfig={timingConfig} 
+            peakHourConfig={peakHourConfig}
+            onTimingConfigSave={handleTimingConfigSave}
+            onPeakHourConfigSave={handlePeakHourConfigSave}
+          />
       </Header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">

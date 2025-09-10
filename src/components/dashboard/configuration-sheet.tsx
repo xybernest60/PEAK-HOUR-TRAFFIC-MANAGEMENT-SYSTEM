@@ -14,43 +14,64 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Settings } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { ScrollArea } from "../ui/scroll-area";
 
-export interface TimingConfiguration {
+export interface TimingConfig {
   normalGreenTime: number;
   peakGreenTime: number;
   rainGreenTime: number;
   yellowTime: number;
   allRedTime: number;
+}
+
+export interface PeakHourConfig {
   peakStartTime: string;
   peakEndTime: string;
 }
 
 interface ConfigurationSheetProps {
-  config: TimingConfiguration;
-  onSave: (newConfig: TimingConfiguration) => void;
+  timingConfig: TimingConfig;
+  peakHourConfig: PeakHourConfig;
+  onTimingConfigSave: (newConfig: TimingConfig) => void;
+  onPeakHourConfigSave: (newConfig: PeakHourConfig) => void;
 }
 
 export default function ConfigurationSheet({
-  config,
-  onSave,
+  timingConfig,
+  peakHourConfig,
+  onTimingConfigSave,
+  onPeakHourConfigSave,
 }: ConfigurationSheetProps) {
-  const [localConfig, setLocalConfig] = React.useState<TimingConfiguration>(config);
+  const [localTimingConfig, setLocalTimingConfig] = React.useState<TimingConfig>(timingConfig);
+  const [localPeakHourConfig, setLocalPeakHourConfig] = React.useState<PeakHourConfig>(peakHourConfig);
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
-    setLocalConfig(config);
-  }, [config, isOpen]);
-
-  const handleSave = () => {
-    onSave(localConfig);
-    setIsOpen(false);
-  };
+    if (isOpen) {
+        setLocalTimingConfig(timingConfig);
+        setLocalPeakHourConfig(peakHourConfig);
+    }
+  }, [timingConfig, peakHourConfig, isOpen]);
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTimingInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-    setLocalConfig(prev => ({...prev, [name]: type === 'number' ? Number(value) : value }));
+    setLocalTimingConfig(prev => ({...prev, [name]: type === 'number' ? Number(value) : value }));
   }
+
+  const handlePeakHourInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLocalPeakHourConfig(prev => ({...prev, [name]: value }));
+  }
+
+  const handleTimingSave = () => {
+    onTimingConfigSave(localTimingConfig);
+    // Maybe close the sheet? For now, we keep it open.
+  };
+
+  const handlePeakHourSave = () => {
+    onPeakHourConfigSave(localPeakHourConfig);
+    // Maybe close the sheet? For now, we keep it open.
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -60,55 +81,63 @@ export default function ConfigurationSheet({
           <span className="sr-only">Open Settings</span>
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle>System Configuration</SheetTitle>
           <SheetDescription>
-            Adjust system parameters. Click save when you're done.
+            Adjust system parameters. Click save on a section to apply changes.
           </SheetDescription>
         </SheetHeader>
-        <div className="grid gap-6 py-4">
-          <div className="space-y-4 rounded-md border p-4">
-             <h4 className="text-lg font-semibold">Timing Delays (seconds)</h4>
-            <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="normalGreenTime">Normal Green</Label>
-                <Input id="normalGreenTime" name="normalGreenTime" type="number" value={localConfig.normalGreenTime} onChange={handleInputChange} className="col-span-1" />
+        <ScrollArea className="flex-grow pr-4">
+            <div className="space-y-6 py-4">
+                <div className="space-y-4 rounded-md border p-4">
+                    <div className="flex justify-between items-center">
+                        <h4 className="text-lg font-semibold">Timing Delays (seconds)</h4>
+                        <Button onClick={handleTimingSave} size="sm">Save Delays</Button>
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="normalGreenTime">Normal Green</Label>
+                        <Input id="normalGreenTime" name="normalGreenTime" type="number" value={localTimingConfig.normalGreenTime} onChange={handleTimingInputChange} className="col-span-1" />
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="peakGreenTime">Peak Green</Label>
+                        <Input id="peakGreenTime" name="peakGreenTime" type="number" value={localTimingConfig.peakGreenTime} onChange={handleTimingInputChange} className="col-span-1" />
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="rainGreenTime">Rain Green</Label>
+                        <Input id="rainGreenTime" name="rainGreenTime" type="number" value={localTimingConfig.rainGreenTime} onChange={handleTimingInputChange} className="col-span-1" />
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="yellowTime">Yellow Time</Label>
+                        <Input id="yellowTime" name="yellowTime" type="number" value={localTimingConfig.yellowTime} onChange={handleTimingInputChange} className="col-span-1" />
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="allRedTime">All-Red Time</Label>
+                        <Input id="allRedTime" name="allRedTime" type="number" value={localTimingConfig.allRedTime} onChange={handleTimingInputChange} className="col-span-1" />
+                    </div>
+                </div>
+                
+                <div className="space-y-4 rounded-md border p-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h4 className="text-lg font-semibold">Peak Hour Schedule</h4>
+                            <p className="text-sm text-muted-foreground">Automatically enable Peak Hour mode.</p>
+                        </div>
+                        <Button onClick={handlePeakHourSave} size="sm">Save Schedule</Button>
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="peakStartTime">Start Time</Label>
+                        <Input id="peakStartTime" name="peakStartTime" type="time" value={localPeakHourConfig.peakStartTime} onChange={handlePeakHourInputChange} className="col-span-1" />
+                    </div>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="peakEndTime">End Time</Label>
+                        <Input id="peakEndTime" name="peakEndTime" type="time" value={localPeakHourConfig.peakEndTime} onChange={handlePeakHourInputChange} className="col-span-1" />
+                    </div>
+                </div>
             </div>
-             <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="peakGreenTime">Peak Green</Label>
-                <Input id="peakGreenTime" name="peakGreenTime" type="number" value={localConfig.peakGreenTime} onChange={handleInputChange} className="col-span-1" />
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="rainGreenTime">Rain Green</Label>
-                <Input id="rainGreenTime" name="rainGreenTime" type="number" value={localConfig.rainGreenTime} onChange={handleInputChange} className="col-span-1" />
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="yellowTime">Yellow Time</Label>
-                <Input id="yellowTime" name="yellowTime" type="number" value={localConfig.yellowTime} onChange={handleInputChange} className="col-span-1" />
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="allRedTime">All-Red Time</Label>
-                <Input id="allRedTime" name="allRedTime" type="number" value={localConfig.allRedTime} onChange={handleInputChange} className="col-span-1" />
-            </div>
-          </div>
-
-          <Separator />
-          
-           <div className="space-y-4 rounded-md border p-4">
-             <h4 className="text-lg font-semibold">Peak Hour Schedule</h4>
-             <p className="text-sm text-muted-foreground">Automatically enable Peak Hour mode during this window.</p>
-            <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="peakStartTime">Start Time</Label>
-                <Input id="peakStartTime" name="peakStartTime" type="time" value={localConfig.peakStartTime} onChange={handleInputChange} className="col-span-1" />
-            </div>
-             <div className="grid grid-cols-2 items-center gap-4">
-                <Label htmlFor="peakEndTime">End Time</Label>
-                <Input id="peakEndTime" name="peakEndTime" type="time" value={localConfig.peakEndTime} onChange={handleInputChange} className="col-span-1" />
-            </div>
-          </div>
-        </div>
+        </ScrollArea>
         <SheetFooter>
-          <Button onClick={handleSave}>Save Changes</Button>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>Close</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
