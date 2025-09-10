@@ -18,6 +18,7 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { ToastAction } from "@/components/ui/toast";
 
 export default function LoginDialog() {
   const [email, setEmail] = React.useState("");
@@ -42,9 +43,10 @@ export default function LoginDialog() {
       toast({
         title: `Welcome back, Nigel!`,
         description: "You have been successfully signed in.",
+        action: <ToastAction altText="Go to Dashboard" onClick={() => router.push('/dashboard')}>Go to Dashboard</ToastAction>
       });
       setIsOpen(false);
-      router.push("/dashboard");
+      // router.push("/dashboard"); // We now use the toast action
     }
   }, [user, googleUser, router, toast]);
 
