@@ -18,7 +18,6 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ToastAction } from "@/components/ui/toast";
 
 export default function LoginDialog() {
   const [email, setEmail] = React.useState("");
