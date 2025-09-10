@@ -151,12 +151,12 @@ export default function DashboardPage() {
     try {
       await set(ref(database, 'traffic/state/peak_active'), isPeak);
     } catch (error) {
-      console.error("Failed to toggle peak hour:", error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Could not toggle peak hour mode.",
-      });
+        console.error("Failed to toggle peak hour:", error);
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: "Could not toggle peak hour mode.",
+        });
     }
   };
   
@@ -170,8 +170,14 @@ export default function DashboardPage() {
         return;
     }
     const manualLightPath = lightId === 'light1' ? 'manualLight1' : 'manualLight2';
+    const lightPath = lightId === 'light1' ? 'light1' : 'light2';
+
     try {
-      await set(ref(database, `traffic/state/${manualLightPath}`), color.toUpperCase());
+      const upperCaseColor = color.toUpperCase();
+      await Promise.all([
+        set(ref(database, `traffic/state/${manualLightPath}`), upperCaseColor),
+        set(ref(database, `traffic/state/${lightPath}`), upperCaseColor)
+      ]);
     } catch (error) {
       console.error(`Failed to set ${lightId} to ${color}:`, error);
       toast({
@@ -220,5 +226,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
