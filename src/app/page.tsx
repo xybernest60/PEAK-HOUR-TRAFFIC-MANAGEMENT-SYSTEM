@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Car, TrafficCone, Waypoints, TrafficLight as TrafficLightIcon } from "lucide-react";
+import { Car, TrafficCone, Waypoints } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
@@ -26,11 +26,11 @@ export default function LandingPage() {
         <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background">
             <div className="absolute inset-0 z-0">
                 <FloatingIcon icon={Car} className="top-[10%] left-[15%] text-4xl" />
-                <FloatingIcon icon={TrafficLightIcon} className="top-[20%] right-[20%] text-5xl" />
+                <FloatingIcon icon={TrafficPilotIcon} className="top-[20%] right-[20%] text-5xl" />
                 <FloatingIcon icon={Waypoints} className="bottom-[15%] left-[25%] text-6xl" />
                 <FloatingIcon icon={TrafficCone} className="bottom-[20%] right-[15%] text-4xl" />
                 <FloatingIcon icon={Car} className="top-[60%] left-[30%] text-5xl" />
-                <FloatingIcon icon={TrafficLightIcon} className="top-[70%] right-[40%] text-3xl" />
+                <FloatingIcon icon={TrafficPilotIcon} className="top-[70%] right-[40%] text-3xl" />
             </div>
 
             <style jsx>{`
