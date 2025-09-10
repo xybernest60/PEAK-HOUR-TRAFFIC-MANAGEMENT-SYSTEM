@@ -117,10 +117,11 @@ export default function DashboardPage() {
     }
     
     const path = lightId === 'light1' ? 'traffic/state/manualLight1' : 'traffic/state/manualLight2';
+    const colorValue = color.toUpperCase();
 
     try {
-      await set(ref(database, path), color);
-      toast({ title: `Set ${lightId} to ${color}` });
+      await set(ref(database, path), colorValue);
+      toast({ title: `Set ${lightId} to ${colorValue}` });
     } catch (error) {
       console.error("Failed to manually change light:", error);
       toast({ title: "Error changing light", variant: "destructive" });
