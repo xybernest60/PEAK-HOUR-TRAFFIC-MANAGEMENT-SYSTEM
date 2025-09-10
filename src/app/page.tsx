@@ -169,8 +169,9 @@ export default function DashboardPage() {
         });
         return;
     }
+    const manualLightPath = lightId === 'light1' ? 'manualLight1' : 'manualLight2';
     try {
-      await set(ref(database, `traffic/state/${lightId}`), color.toUpperCase());
+      await set(ref(database, `traffic/state/${manualLightPath}`), color.toUpperCase());
     } catch (error) {
       console.error(`Failed to set ${lightId} to ${color}:`, error);
       toast({
@@ -219,3 +220,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
