@@ -88,7 +88,7 @@ export default function DashboardPage() {
 
     const checkPeakTime = () => {
       const { peakStartTime, peakEndTime } = peakHourConfig;
-      if (!peakStartTime || !peakEndTime || peakStartTime === peakEndTime) {
+      if (!peakStartTime || !peakEndTime || typeof peakStartTime !== 'string' || typeof peakEndTime !== 'string' || peakStartTime === peakEndTime) {
         return; 
       }
 
