@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Car,
   CloudRain,
-  ToggleLeft,
+  Clock,
   Waypoints,
+  ToggleLeft,
 } from "lucide-react";
 import StatusCard from "./status-card";
 
@@ -19,6 +20,7 @@ interface SystemStatusCardProps {
   currentPhase: string;
   phaseState: "green" | "yellow" | "red" | "amber";
   isManualOverride: boolean;
+  isPeakHour: boolean;
 }
 
 export default function SystemStatusCard({
@@ -26,6 +28,7 @@ export default function SystemStatusCard({
   currentPhase,
   phaseState,
   isManualOverride,
+  isPeakHour
 }: SystemStatusCardProps) {
   const getPhaseText = () => {
     if (currentPhase.includes('R1')) {
@@ -46,30 +49,37 @@ export default function SystemStatusCard({
         <StatusCard
             icon={CloudRain}
             title="Rain Detection"
-            value={status.rainDetected ? "Detected" : "Clear"}
-            valueClass={status.rainDetected ? "text-cyan-400 after:bg-cyan-400/50" : "text-green-400"}
+            value={status.rainDetected ? "Active" : "Clear"}
+            valueClass={status.rainDetected ? "text-cyan-400 after:bg-cyan-400/50" : ""}
             hasGlow={status.rainDetected}
         />
          <StatusCard
           icon={ToggleLeft}
           title="Operation Mode"
           value={isManualOverride ? "Manual" : "Automatic"}
-          valueClass={isManualOverride ? "text-amber-400 after:bg-amber-400/50" : "text-green-400"}
+          valueClass={isManualOverride ? "text-amber-400 after:bg-amber-400/50" : ""}
           hasGlow={isManualOverride}
         />
         <StatusCard
             icon={Car}
             title="R. Mugabe Presence"
             value={status.vehiclePresence1 ? "Detected" : "None"}
-            valueClass={status.vehiclePresence1 ? "text-primary after:bg-primary/50" : "text-muted-foreground"}
+            valueClass={status.vehiclePresence1 ? "text-primary after:bg-primary/50" : ""}
             hasGlow={status.vehiclePresence1}
         />
         <StatusCard
             icon={Car}
             title="S. Munjoma Presence"
             value={status.vehiclePresence2 ? "Detected" : "None"}
-            valueClass={status.vehiclePresence2 ? "text-primary after:bg-primary/50" : "text-muted-foreground"}
+            valueClass={status.vehiclePresence2 ? "text-primary after:bg-primary/50" : ""}
             hasGlow={status.vehiclePresence2}
+        />
+        <StatusCard
+            icon={Clock}
+            title="Peak Hour"
+            value={isPeakHour ? "Active" : "Inactive"}
+            valueClass={isPeakHour ? "text-rose-400 after:bg-rose-400/50" : ""}
+            hasGlow={isPeakHour}
         />
          <StatusCard
           icon={Waypoints}

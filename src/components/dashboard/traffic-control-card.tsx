@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import * as React from "react";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
 
 const Light = ({ color, active }: { color: string; active: boolean }) => {
   return (
@@ -17,6 +19,7 @@ const Light = ({ color, active }: { color: string; active: boolean }) => {
       className={cn(
         "h-10 w-10 rounded-full transition-all duration-300 border-2 border-card",
         active ? "bg-opacity-100 shadow-[0_0_15px_3px_var(--light-color)]" : "bg-opacity-20",
+        "dark:border-white/20"
       )}
       style={{ backgroundColor: color, "--light-color": color } as React.CSSProperties}
     />
@@ -26,11 +29,9 @@ const Light = ({ color, active }: { color: string; active: boolean }) => {
 const TrafficLight = ({ activeColor }: { activeColor: LightColor }) => {
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg bg-background/50 dark:bg-background p-2 border">
-       <div className="flex flex-col items-center gap-2 rounded-lg bg-background/50 dark:bg-background p-2">
-        <Light color="#ef4444" active={activeColor === "red"} />
-        <Light color="#f59e0b" active={activeColor === "amber" || activeColor === "yellow"} />
-        <Light color="#22c55e" active={activeColor === "green"} />
-      </div>
+      <Light color="#ef4444" active={activeColor === "red"} />
+      <Light color="#f59e0b" active={activeColor === "amber" || activeColor === "yellow"} />
+      <Light color="#22c55e" active={activeColor === "green"} />
     </div>
   );
 };
@@ -38,20 +39,50 @@ const TrafficLight = ({ activeColor }: { activeColor: LightColor }) => {
 interface TrafficControlCardProps {
   nsColor: LightColor;
   ewColor: LightColor;
+  isManualOverride: boolean;
+  onManualOverrideChange: (isManual: boolean) => void;
+  isPeakHour: boolean;
+  onPeakHourChange: (isPeak: boolean) => void;
 }
 
 export default function TrafficControlCard({
   nsColor,
   ewColor,
+  isManualOverride,
+  onManualOverrideChange,
+  isPeakHour,
+  onPeakHourChange,
 }: TrafficControlCardProps) {
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Real-time Monitor</CardTitle>
-        <CardDescription>
-          Live intersection traffic status.
-        </CardDescription>
+        <div className="flex justify-between items-start">
+            <div>
+                <CardTitle>Real-time Monitor</CardTitle>
+                <CardDescription>
+                Live intersection traffic status.
+                </CardDescription>
+            </div>
+             <div className="flex items-center gap-4">
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        id="peak-hour-mode"
+                        checked={isPeakHour}
+                        onCheckedChange={onPeakHourChange}
+                    />
+                    <Label htmlFor="peak-hour-mode">Peak Hour</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        id="manual-override"
+                        checked={isManualOverride}
+                        onCheckedChange={onManualOverrideChange}
+                    />
+                    <Label htmlFor="manual-override">Manual Override</Label>
+                </div>
+            </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">

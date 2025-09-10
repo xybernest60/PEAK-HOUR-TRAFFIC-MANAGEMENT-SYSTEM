@@ -6,15 +6,25 @@ import TrafficControlCard from "@/components/dashboard/traffic-control-card";
 import SystemStatusCard from "@/components/dashboard/system-status-card";
 import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/firebase";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, set } from "firebase/database";
+import ConfigurationSheet, { TimingConfiguration } from "@/components/dashboard/configuration-sheet";
 
 export type LightColor = "green" | "yellow" | "red" | "amber";
 
 export default function DashboardPage() {
   const { toast } = useToast();
 
+  const [timingConfig, setTimingConfig] = React.useState<TimingConfiguration>({
+    normalGreenTime: 5,
+    peakGreenTime: 10,
+    rainGreenTime: 7,
+    yellowTime: 2,
+    allRedTime: 1,
+  });
+
   const [isManualOverride, setIsManualOverride] = React.useState(false);
-  
+  const [isPeakHour, setIsPeakHour] = React.useState(false);
+
   const [systemStatus, setSystemStatus] = React.useState({
     rainDetected: false,
     vehiclePresence1: false,
@@ -25,100 +35,163 @@ export default function DashboardPage() {
   const [currentPhase, setCurrentPhase] = React.useState("R1_GREEN");
   const [light1Status, setLight1Status] = React.useState<LightColor>("red");
   const [light2Status, setLight2Status] = React.useState<LightColor>("red");
-  
+
   const lastHeartbeat = React.useRef<number>(0);
 
   React.useEffect(() => {
-    const trafficRef = ref(database, 'traffic');
-    const unsubscribe = onValue(trafficRef, (snapshot) => {
+    const stateRef = ref(database, 'state');
+    const systemRef = ref(database, 'system');
+
+    const unsubscribeState = onValue(stateRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         // State & Mode
-        const state = data.state;
-        const mode = state.mode;
-        
-        setCurrentPhase(state.current_phase);
-        setLight1Status(state.light1.toLowerCase());
-        setLight2Status(state.light2.toLowerCase());
-        setIsManualOverride(mode === "MANUAL");
+        setCurrentPhase(data.current_phase || "UNKNOWN");
+        setLight1Status((data.light1 || "RED").toLowerCase());
+        setLight2Status((data.light2 || "RED").toLowerCase());
+        setIsManualOverride(data.mode === "MANUAL");
+        setIsPeakHour(data.peak_active || false);
 
         // System Status & Sensors
-        setSystemStatus({
-          rainDetected: state.rain,
-          vehiclePresence1: state.ir1,
-          vehiclePresence2: state.ir2,
-          systemOnline: true, // Assume online if we get data
+        setSystemStatus(prev => ({
+          ...prev,
+          rainDetected: data.rain || false,
+          vehiclePresence1: data.ir1 || false,
+          vehiclePresence2: data.ir2 || false,
+        }));
+        
+        // Config from state
+        setTimingConfig({
+            normalGreenTime: data.normal_green_delay || 0,
+            peakGreenTime: data.peak_green_delay || 0,
+            rainGreenTime: data.rain_green_delay || 0,
+            yellowTime: data.yellow_delay || 0,
+            allRedTime: data.all_red_delay || 0,
         });
-
-        // System Heartbeat
-        if(data.system && data.system.heartbeat_ms) {
-            lastHeartbeat.current = data.system.heartbeat_ms;
-        }
-
       }
     }, (error) => {
       console.error(error);
-      setSystemStatus(prev => ({...prev, systemOnline: false, rainDetected: false, vehiclePresence1: false, vehiclePresence2: false}));
       toast({
         variant: "destructive",
         title: "Database Error",
         description: "Could not connect to the real-time database.",
       });
     });
-    
-     // Check for heartbeat every 10 seconds
+
+    const unsubscribeSystem = onValue(systemRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.heartbeat_ms) {
+            lastHeartbeat.current = data.heartbeat_ms;
+        }
+    });
+
+    // Check for heartbeat every 10 seconds
     const interval = setInterval(() => {
       const now = Date.now();
       const timeSinceHeartbeat = now - lastHeartbeat.current;
-      
-      if (timeSinceHeartbeat > 15000) { // 15 seconds threshold
-        if (systemStatus.systemOnline) {
-          setSystemStatus(prev => ({ ...prev, systemOnline: false }));
+
+      const isOnline = timeSinceHeartbeat < 15000; // 15 seconds threshold
+
+      setSystemStatus(prev => {
+        if (prev.systemOnline !== isOnline) {
           toast({
-            variant: "destructive",
-            title: "Controller Offline",
-            description: "No heartbeat received from the controller.",
+            variant: isOnline ? "default" : "destructive",
+            title: isOnline ? "Controller Online" : "Controller Offline",
+            description: isOnline ? "Connection restored." : "No heartbeat received.",
           });
+          return { ...prev, systemOnline: isOnline };
         }
-      } else {
-         if (!systemStatus.systemOnline) {
-           setSystemStatus(prev => ({ ...prev, systemOnline: true }));
-         }
-      }
+        return prev;
+      });
     }, 10000);
 
 
     return () => {
-        unsubscribe();
-        clearInterval(interval);
+      unsubscribeState();
+      unsubscribeSystem();
+      clearInterval(interval);
     }
-  }, [toast, systemStatus.systemOnline]);
+  }, [toast]);
+
+  const handleConfigSave = async (newConfig: TimingConfiguration) => {
+    try {
+        await set(ref(database, 'state/normal_green_delay'), newConfig.normalGreenTime);
+        await set(ref(database, 'state/peak_green_delay'), newConfig.peakGreenTime);
+        await set(ref(database, 'state/rain_green_delay'), newConfig.rainGreenTime);
+        await set(ref(database, 'state/yellow_delay'), newConfig.yellowTime);
+        await set(ref(database, 'state/all_red_delay'), newConfig.allRedTime);
+        toast({
+            title: "Configuration Saved",
+            description: "Timing delays have been updated.",
+        });
+    } catch (error) {
+        console.error("Failed to save timing configuration:", error);
+        toast({
+            variant: "destructive",
+            title: "Save Failed",
+            description: "Could not save timing configuration.",
+        });
+    }
+  };
+
+  const handleManualOverrideToggle = async (isManual: boolean) => {
+    try {
+      await set(ref(database, 'state/mode'), isManual ? "MANUAL" : "AUTO");
+    } catch (error) {
+      console.error("Failed to toggle manual override:", error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not toggle manual override.",
+      });
+    }
+  };
+
+  const handlePeakHourToggle = async (isPeak: boolean) => {
+    try {
+      await set(ref(database, 'state/peak_active'), isPeak);
+    } catch (error) {
+      console.error("Failed to toggle peak hour:", error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not toggle peak hour mode.",
+      });
+    }
+  };
 
 
   const getPhaseState = (phase: string) => {
-    if (phase.includes('AMBER')) return 'amber';
+    if (!phase) return 'red';
+    if (phase.includes('AMBER') || phase.includes('YELLOW')) return 'amber';
     if (phase.includes('GREEN')) return 'green';
     return 'red';
   }
-  
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header systemOnline={systemStatus.systemOnline} />
+      <Header systemOnline={systemStatus.systemOnline}>
+         <ConfigurationSheet config={timingConfig} onSave={handleConfigSave} />
+      </Header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-            <TrafficControlCard
-              nsColor={light1Status}
-              ewColor={light2Status}
-            />
+          <TrafficControlCard
+            nsColor={light1Status}
+            ewColor={light2Status}
+            isManualOverride={isManualOverride}
+            onManualOverrideChange={handleManualOverrideToggle}
+            isPeakHour={isPeakHour}
+            onPeakHourChange={handlePeakHourToggle}
+          />
         </div>
-         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-1">
-           <SystemStatusCard 
-             status={systemStatus}
-             currentPhase={currentPhase}
-             phaseState={getPhaseState(currentPhase)}
-             isManualOverride={isManualOverride}
-           />
+        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-1">
+          <SystemStatusCard
+            status={systemStatus}
+            currentPhase={currentPhase}
+            phaseState={getPhaseState(currentPhase)}
+            isManualOverride={isManualOverride}
+            isPeakHour={isPeakHour}
+          />
         </div>
       </main>
     </div>

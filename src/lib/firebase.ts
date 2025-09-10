@@ -2,13 +2,13 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration - REPLACE WITH YOUR OWN
 const firebaseConfig = {
   apiKey: "AIzaSyD1IE2VmWjsDFZC0C79OJJlB4savo1UQho",
   authDomain: "peak-hour-traffic-management.firebaseapp.com",
   databaseURL: "https://peak-hour-traffic-management-default-rtdb.firebaseio.com",
   projectId: "peak-hour-traffic-management",
-  storageBucket: "peak-hour-traffic-management.firebasestorage.app",
+  storageBucket: "peak-hour-traffic-management.appspot.com",
   messagingSenderId: "793875835833",
   appId: "1:793875835833:web:dd5cf9e5f9bd28baf2e468",
   measurementId: "G-LHFBR4W6F6"
