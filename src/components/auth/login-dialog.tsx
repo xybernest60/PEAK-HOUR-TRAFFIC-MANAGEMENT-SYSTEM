@@ -6,7 +6,6 @@ import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
@@ -31,42 +30,25 @@ export default function LoginDialog() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const success = await signInWithEmailAndPassword(email, password);
-      if (!success) {
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description: error?.message || "Please check your credentials.",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    await signInWithEmailAndPassword(email, password);
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      console.error(err);
-      toast({
-        variant: "destructive",
-        title: "Google Sign-In Failed",
-        description: googleError?.message || "Could not sign in with Google.",
-      });
-    }
+    await signInWithGoogle();
   };
 
   React.useEffect(() => {
     if (user || googleUser) {
       toast({
-        title: `Welcome back!`,
+        title: `Welcome back, Nigel!`,
         description: "You have been successfully signed in.",
       });
       setIsOpen(false);
       router.push("/dashboard");
     }
+  }, [user, googleUser, router, toast]);
+
+  React.useEffect(() => {
     if (error) {
       toast({
         variant: "destructive",
@@ -81,7 +63,7 @@ export default function LoginDialog() {
         description: googleError.message,
       });
     }
-  }, [user, googleUser, error, googleError, router, toast]);
+  }, [error, googleError, toast]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

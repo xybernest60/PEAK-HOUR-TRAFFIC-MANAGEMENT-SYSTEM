@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 interface UserMenuProps {
   user: User | null;
@@ -28,15 +28,9 @@ export default function UserMenu({ user }: UserMenuProps) {
   };
   
   const getInitials = (email: string | null | undefined) => {
-    if (!email) return "?";
+    if (!email) return "U";
     return email[0].toUpperCase();
   }
-
-  const getDisplayName = (user: User | null) => {
-    if (!user) return "Welcome";
-    return user.displayName || user.email?.split('@')[0] || "User";
-  }
-
 
   if (!user) return null;
 
@@ -54,7 +48,7 @@ export default function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              Welcome, {getDisplayName(user)}
+              Welcome, Nigel
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
