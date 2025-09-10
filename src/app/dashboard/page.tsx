@@ -10,7 +10,6 @@ import { ref, onValue, set } from "firebase/database";
 import ConfigurationSheet, { TimingConfiguration } from "@/components/dashboard/configuration-sheet";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { Button } from "@/components/ui/button";
 
 export type LightColor = "green" | "yellow" | "red" | "amber";
 
@@ -46,7 +45,7 @@ export default function DashboardPage() {
   React.useEffect(() => {
     if (loading) return;
     if (!user) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 
@@ -201,11 +200,6 @@ export default function DashboardPage() {
     if (phase.includes('GREEN')) return 'green';
     return 'red';
   }
-  
-  const handleSignOut = async () => {
-    await auth.signOut();
-    router.push("/login");
-  };
 
   if (loading || !user) {
     return (
@@ -217,9 +211,8 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header systemOnline={systemStatus.systemOnline}>
+      <Header systemOnline={systemStatus.systemOnline} user={user}>
          <ConfigurationSheet config={timingConfig} onSave={handleConfigSave} />
-         <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
       </Header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 lg:grid lg:grid-cols-3">
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">

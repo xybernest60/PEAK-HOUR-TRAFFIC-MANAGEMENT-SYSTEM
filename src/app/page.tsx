@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { Car, TrafficCone, Waypoints } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
+import LoginDialog from "@/components/auth/login-dialog";
 
 const FloatingIcon = ({ icon: Icon, className }: { icon: React.ElementType, className?: string }) => {
     const [animationClass, setAnimationClass] = React.useState("");
@@ -54,11 +53,7 @@ export default function LandingPage() {
                 <p className="mt-4 max-w-[700px] text-muted-foreground md:text-xl">
                    Real-time monitoring and control of urban traffic flow.
                 </p>
-                <Link href="/dashboard" passHref>
-                    <Button className="mt-8" size="lg">
-                        Go to Dashboard
-                    </Button>
-                </Link>
+                <LoginDialog />
             </div>
         </div>
     );

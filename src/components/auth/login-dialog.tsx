@@ -11,57 +11,71 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { TrafficPilotIcon } from "@/components/icons/traffic-pilot-icon";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
-export default function LoginPage() {
+export default function LoginDialog() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth);
   const [signInWithGoogle, googleUser, googleLoading, googleError] = useSignInWithGoogle(auth);
   const { toast } = useToast();
   const router = useRouter();
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const success = await signInWithEmailAndPassword(email, password);
       if (!success) {
-         toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: error?.message || "Please check your credentials.",
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: error?.message || "Please check your credentials.",
         });
       }
     } catch (err) {
-       console.error(err);
+      console.error(err);
     }
   };
-  
+
   const handleGoogleSignIn = async () => {
     try {
-        await signInWithGoogle();
+      await signInWithGoogle();
     } catch (err) {
-        console.error(err);
-        toast({
-            variant: "destructive",
-            title: "Google Sign-In Failed",
-            description: googleError?.message || "Could not sign in with Google.",
-        });
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Google Sign-In Failed",
+        description: googleError?.message || "Could not sign in with Google.",
+      });
     }
-  }
+  };
 
   React.useEffect(() => {
     if (user || googleUser) {
+      toast({
+        title: `Welcome back!`,
+        description: "You have been successfully signed in.",
+      });
+      setIsOpen(false);
       router.push("/dashboard");
     }
     if (error) {
-       toast({
+      toast({
         variant: "destructive",
         title: "Login Failed",
         description: error.message,
       });
     }
-     if (googleError) {
-       toast({
+    if (googleError) {
+      toast({
         variant: "destructive",
         title: "Google Sign-In Failed",
         description: googleError.message,
@@ -69,18 +83,24 @@ export default function LoginPage() {
     }
   }, [user, googleUser, error, googleError, router, toast]);
 
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-                <TrafficPilotIcon className="h-12 w-12 text-primary" />
-            </div>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>Sign in to access the dashboard.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="mt-8" size="lg">
+          Go to Dashboard
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex justify-center mb-4">
+            <TrafficPilotIcon className="h-12 w-12 text-primary" />
+          </div>
+          <DialogTitle className="text-center">Welcome Back</DialogTitle>
+          <DialogDescription className="text-center">
+            Sign in to access the dashboard.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="px-6 pb-6">
           <form onSubmit={handleSignIn} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -95,10 +115,10 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                required 
+              <Input
+                id="password"
+                type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -107,16 +127,16 @@ export default function LoginPage() {
               {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
-           <div className="my-4 flex items-center">
-                <Separator className="flex-1" />
-                <span className="mx-4 text-xs text-muted-foreground">OR</span>
-                <Separator className="flex-1" />
-            </div>
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={googleLoading}>
-                 {googleLoading ? "Redirecting..." : "Sign In with Google"}
-            </Button>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="my-4 flex items-center">
+            <Separator className="flex-1" />
+            <span className="mx-4 text-xs text-muted-foreground">OR</span>
+            <Separator className="flex-1" />
+          </div>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={googleLoading}>
+            {googleLoading ? "Redirecting..." : "Sign In with Google"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
