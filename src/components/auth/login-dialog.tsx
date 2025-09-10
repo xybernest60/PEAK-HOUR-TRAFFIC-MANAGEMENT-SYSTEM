@@ -46,7 +46,7 @@ export default function LoginDialog() {
         action: <ToastAction altText="Go to Dashboard" onClick={() => router.push('/dashboard')}>Go to Dashboard</ToastAction>
       });
       setIsOpen(false);
-      // router.push("/dashboard"); // We now use the toast action
+       router.push("/dashboard");
     }
   }, [user, googleUser, router, toast]);
 
